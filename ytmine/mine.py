@@ -63,13 +63,22 @@ def call(endpoint, **params):
     raise SystemExit("재시도 후에도 실패했습니다.")
 
 
+def iso_dur(s):
+    """PT1H2M3S -> 초. 감정 지도의 가로축이 되므로 영상 길이가 필요하다."""
+    m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", s or "")
+    if not m:
+        return 0
+    h, mi, se = (int(x) if x else 0 for x in m.groups())
+    return h * 3600 + mi * 60 + se
+
+
 def db():
     c = sqlite3.connect(DB)
     c.executescript("""
     CREATE TABLE IF NOT EXISTS channel(id TEXT PRIMARY KEY, title TEXT, handle TEXT, subs INTEGER);
     CREATE TABLE IF NOT EXISTS video(
       id TEXT PRIMARY KEY, channel_id TEXT, title TEXT, published TEXT,
-      views INTEGER, comments INTEGER, done INTEGER DEFAULT 0);
+      views INTEGER, comments INTEGER, dur INTEGER DEFAULT 0, done INTEGER DEFAULT 0);
     CREATE TABLE IF NOT EXISTS comment(
       id TEXT PRIMARY KEY, video_id TEXT, text TEXT, author TEXT,
       likes INTEGER, replies INTEGER, published TEXT);
@@ -122,14 +131,15 @@ def collect(handles, n_videos):
                 break
 
         for i in range(0, len(vids), 50):
-            r = call("videos", part="snippet,statistics", id=",".join(vids[i:i + 50]))
+            r = call("videos", part="snippet,statistics,contentDetails", id=",".join(vids[i:i + 50]))
             for it in r.get("items", []):
                 st = it.get("statistics", {})
                 con.execute(
-                    "INSERT OR IGNORE INTO video(id,channel_id,title,published,views,comments) "
-                    "VALUES(?,?,?,?,?,?)",
+                    "INSERT OR IGNORE INTO video(id,channel_id,title,published,views,comments,dur) "
+                    "VALUES(?,?,?,?,?,?,?)",
                     (it["id"], ch["id"], it["snippet"]["title"], it["snippet"]["publishedAt"],
-                     int(st.get("viewCount", 0) or 0), int(st.get("commentCount", 0) or 0)))
+                     int(st.get("viewCount", 0) or 0), int(st.get("commentCount", 0) or 0),
+                     iso_dur(it.get("contentDetails", {}).get("duration", ""))))
         con.commit()
 
         todo = con.execute(
@@ -229,6 +239,34 @@ def tokens(text):
     return out
 
 
+TS = re.compile(r"\b(\d{1,2}):([0-5]\d)(?::([0-5]\d))?\b")
+# 배지로 따로 보여주므로 본문 맨 앞의 시각은 지운다 — 같은 값이 두 번 보이지 않게
+TS_LEAD = re.compile(r"^\s*\d{1,2}:[0-5]\d(?::[0-5]\d)?\s*[-~·]?\s*")
+
+
+def timestamps(text):
+    """댓글에 박힌 재생 시각. 포맷 분석은 '무엇이 먹혔나'까지만 말하지만,
+    이건 영상 안 '어디서' 터졌는지를 말해준다."""
+    out = []
+    for a, b, c in TS.findall(text or ""):
+        sec = (int(a) * 3600 + int(b) * 60 + int(c)) if c else (int(a) * 60 + int(b))
+        if 0 < sec < 6 * 3600:
+            out.append(sec)
+    return out
+
+
+def heatmap(rows, dur, bins=40):
+    """구간별 언급 밀도. 좋아요로 가중한다 — 한 사람이 찍은 지점에 200명이
+    동의했다면 그 지점의 무게는 1이 아니라 200이다."""
+    if not dur:
+        dur = max([t for _, t, _ in rows] or [1]) + 30
+    h = [0.0] * bins
+    for _, sec, likes in rows:
+        i = min(bins - 1, int(sec / dur * bins))
+        h[i] += 1 + math.log10(1 + max(0, likes)) * 2
+    return h, dur
+
+
 # ---------------------------------------------------------------- report
 def report(out_path, top_n=1500):
     con = db()
@@ -259,6 +297,41 @@ def report(out_path, top_n=1500):
     tx = max(1, pct([i["x"] for i in items], .75))
     ty = max(1, pct([i["y"] for i in items], .75))
 
+    # 영상별 감정 지도 — 아웃라이어가 '어디서' 터졌는지
+    heat = []
+    for vid, vtitle, dur, views in con.execute(
+            "SELECT id,title,dur,views FROM video WHERE done=1").fetchall():
+        marks = []
+        for text, likes in con.execute(
+                "SELECT text,likes FROM comment WHERE video_id=?", (vid,)):
+            for sec in timestamps(text):
+                marks.append((text, sec, likes))
+        if len(marks) < 4:
+            continue
+        bins = 40
+        h, dur2 = heatmap(marks, dur, bins)
+        peaks, used = [], set()
+        for i in sorted(range(bins), key=lambda i: -h[i]):
+            if h[i] <= 0 or len(peaks) >= 3:
+                break
+            if i in used:
+                continue
+            peaks.append(i)
+            used.update(range(i - 2, i + 3))   # 좌우 억제: 같은 봉우리를 두 번 세지 않는다
+        slot = dur2 / bins
+        peak_out = []
+        for i in peaks:
+            lo, hi = max(0, (i - 1) * slot), (i + 2) * slot
+            near = sorted([m for m in marks if lo <= m[1] < hi], key=lambda m: -m[2])[:4]
+            peak_out.append({
+                "at": int(lo), "w": round(h[i], 1),
+                "cs": [{"c": TS_LEAD.sub("", t.strip())[:220], "s": sec, "l": lk}
+                       for t, sec, lk in near]})
+        heat.append({"id": vid, "t": vtitle, "dur": int(dur2), "n": len(marks),
+                     "views": views, "h": [round(x, 2) for x in h], "peaks": peak_out})
+    heat.sort(key=lambda d: -d["n"])
+    heat = heat[:8]
+
     total = len(rows)
     core_n = sum(counts[k] for k in CORE)
     nch = con.execute("SELECT COUNT(*) FROM channel").fetchone()[0]
@@ -270,7 +343,7 @@ def report(out_path, top_n=1500):
 
     data = {
         "items": items, "dist": dist, "tx": tx, "ty": ty,
-        "kw": kw.most_common(40),
+        "kw": kw.most_common(40), "heat": heat,
         "stat": {"total": total, "core": core_n, "ch": nch, "vi": nvi,
                  "pctCore": round(core_n / total * 100) if total else 0},
         "types": {k: ko for k, ko, _ in TYPES},
@@ -280,8 +353,12 @@ def report(out_path, top_n=1500):
         f.write(html)
     print(f"댓글 {total:,}개 분석 → {out_path}")
     print(f"  핵심 재료(실패·상황고백) {core_n:,}개 ({data['stat']['pctCore']}%)")
+    print("  " + "-" * 44)
+    print(f"  {'유형':<12}{'주':>8}{'겹친 것 포함':>14}")
     for d in dist:
-        print(f"  {d['ko']:<10} {d['n']:>6,}")
+        extra = f"{d['tag']:>14,}" if d["tag"] > d["n"] else f"{'':>14}"
+        print(f"  {d['ko']:<12}{d['n']:>8,}{extra}{'  ← 핵심 재료' if d['core'] else ''}")
+    print("\n  주 유형은 하나만 잡히므로, 다른 유형에 가려진 신호는 오른쪽 숫자로 봅니다.")
 
 
 TEMPLATE = r"""<!DOCTYPE html>
@@ -340,6 +417,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
   box-shadow:0 8px 24px -8px rgba(0,0,0,.28);z-index:5}
 .tip b{color:var(--series-1);font-variant-numeric:tabular-nums}
 /* chips */
+.peek{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;min-height:44px}
+.pk{font-size:13.5px;color:var(--text-secondary);margin:5px 0;line-height:1.55}
+.pk b{color:var(--series-1);font-variant-numeric:tabular-nums;margin-right:5px}
+.pk i{font-style:normal;color:var(--text-muted);font-size:12px}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px;
   color:var(--text-secondary);background:var(--bg)}
@@ -376,6 +457,12 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-seconda
   <h2>합의와 논쟁</h2>
   <p class="sub">가로는 좋아요(같은 문제를 가진 사람 수), 세로는 대댓글(의견이 갈리는 정도). 점 하나가 댓글 하나입니다. 올려보면 원문이 보입니다.</p>
   <div class="card"><div class="plot" id="plot"><div class="tip" id="tip"></div></div></div>
+</section>
+
+<section id="heatSec" hidden>
+  <h2>어디서 터졌나</h2>
+  <p class="sub">댓글에 박힌 재생 시각을 모은 것입니다. 포맷 분석은 <b>무엇이</b> 먹혔는지까지만 말해주지만, 이건 영상 안 <b>어디서</b> 터졌는지를 말해줍니다. 아웃라이어의 성공이 썸네일 때문인지 4분 지점의 그 한 마디 때문인지가 여기서 갈립니다. 막대를 올려보면 그 지점의 댓글이 나옵니다.</p>
+  <div id="heat"></div>
 </section>
 
 <section>
@@ -464,6 +551,46 @@ svg.addEventListener('mousemove', e => {
   tip.style.top = Math.max(0, sy(d.y) / k - tip.offsetHeight - 14) + 'px';
 });
 svg.addEventListener('mouseleave', () => tip.style.opacity = 0);
+
+/* 감정 지도 — 영상마다 한 줄. 단일 계열이라 범례 없이 제목이 계열을 지목합니다. */
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+if (D.heat && D.heat.length) {
+  $('#heatSec').hidden = false;
+  const HW = 820, HH = 62, BINS = 40, bw = HW / BINS;
+  $('#heat').innerHTML = D.heat.map((v, vi) => {
+    const mx = Math.max(...v.h, 1);
+    const top = v.peaks[0];
+    let g = `<svg viewBox="0 0 ${HW} ${HH + 18}" role="img" aria-label="${esc(v.t)} 구간별 언급 밀도">`;
+    v.h.forEach((val, i) => {
+      const h2 = Math.max(val > 0 ? 3 : 0, val / mx * HH);
+      if (!h2) return;
+      g += `<rect data-v="${vi}" data-i="${i}" x="${(i * bw + 1).toFixed(1)}" y="${(HH - h2).toFixed(1)}" `
+         + `width="${(bw - 2).toFixed(1)}" height="${h2.toFixed(1)}" rx="3" fill="var(--series-1)" fill-opacity=".8"/>`;
+    });
+    g += `<line x1="0" y1="${HH}" x2="${HW}" y2="${HH}" stroke="var(--line)" stroke-width="1"/>`;
+    [0, .25, .5, .75, 1].forEach(f => {
+      g += `<text class="ax" x="${Math.min(HW - 16, Math.max(14, f * HW))}" y="${HH + 14}" text-anchor="middle">${mmss(v.dur * f)}</text>`;
+    });
+    g += `</svg>`;
+    return `<div class="card hv" data-v="${vi}">
+      <div style="font-weight:650;font-size:15px;margin-bottom:2px">${esc(v.t)}</div>
+      <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:10px">
+        조회 ${nf(v.views)} · 시각 언급 ${nf(v.n)}건 · 길이 ${mmss(v.dur)}
+        ${top ? ` · 가장 뜨거운 지점 <b style="color:var(--series-1)">${mmss(top.at)}</b>` : ''}</div>
+      ${g}
+      <div class="peek" id="peek${vi}">${top ? top.cs.map(c =>
+        `<div class="pk"><b>${mmss(c.s)}</b> ${esc(c.c)}${c.l ? ` <i>♥${nf(c.l)}</i>` : ''}</div>`).join('') : ''}</div>
+    </div>`;
+  }).join('');
+  $('#heat').addEventListener('mousemove', e => {
+    const r = e.target.closest('rect[data-i]'); if (!r) return;
+    const v = D.heat[+r.dataset.v], i = +r.dataset.i, slot = v.dur / BINS;
+    const pk = v.peaks.find(p => Math.abs(p.at - i * slot) < slot);
+    const box = document.getElementById('peek' + r.dataset.v);
+    if (pk) box.innerHTML = pk.cs.map(c =>
+      `<div class="pk"><b>${mmss(c.s)}</b> ${esc(c.c)}${c.l ? ` <i>♥${nf(c.l)}</i>` : ''}</div>`).join('');
+  });
+}
 
 /* 반복되는 말 */
 $('#kw').innerHTML = D.kw.map(([w, n]) => `<span class="chip">${esc(w)}<i>${n}</i></span>`).join('');
