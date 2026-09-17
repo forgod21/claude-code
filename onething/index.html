@@ -87,6 +87,10 @@ textarea::placeholder{color:var(--ink-3)}
 .signcard.hot{border-color:var(--accent-line);background:var(--accent-soft)}
 .signcard .act{font-weight:650;font-size:15.5px;margin-bottom:9px;display:flex;gap:8px;align-items:baseline}
 .signcard .act b{color:var(--accent);font-size:12px;font-weight:700;flex:none}
+.why-box{display:none;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line)}
+.why-box.open{display:block;animation:in .22s ease}
+.signcard .opts{margin-top:2px}
+.signcard .opts .opt{min-width:72px;text-align:center}
 .sigs{display:flex;flex-wrap:wrap;gap:7px}
 .sig{border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;user-select:none;font-family:inherit;transition:.15s;line-height:1.4}
 .sig:hover{border-color:var(--accent-line)}
@@ -250,20 +254,13 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:v
 
 <!-- ========== STEP 2 : SIGN ========== -->
 <section class="step" id="s2">
-  <div class="stepnum">STEP 2 / 6 · 강점</div>
-  <h2>재능은 네 가지 신호로 드러납니다</h2>
+  <div class="stepnum">STEP 2 / 6 · 잘하는 것</div>
+  <h2>이런 일, 나한테 해당되나요</h2>
   <p class="muted" style="font-size:15px">
-    아래 12가지 행동에 대해, <b>당신에게 실제로 해당하는 신호만</b> 눌러주세요.
-    해당 없으면 하나도 안 눌러도 됩니다. 많이 누르는 게 좋은 게 아닙니다.
+    12가지 일을 하나씩 보고 <b>해당되는지만 먼저</b> 골라주세요.
+    해당된다고 하신 것만 "왜 그런가요?"를 한 번 더 여쭤봅니다.
+    아닌 건 그냥 <b>아니다</b>를 누르고 넘어가시면 됩니다.
   </p>
-  <div class="card flat" style="background:var(--bg-soft)">
-    <p class="tiny" style="margin:0">
-      <b style="color:var(--ink)">성공</b> 결과가 유독 잘 나왔다 &nbsp;·&nbsp;
-      <b style="color:var(--ink)">본능</b> 시키지 않아도 손이 갔다 &nbsp;·&nbsp;
-      <b style="color:var(--ink)">성장</b> 배우는 속도가 남달랐다 &nbsp;·&nbsp;
-      <b style="color:var(--ink)">충전</b> 하고 나면 오히려 기운이 났다
-    </p>
-  </div>
   <div id="signGrid"></div>
   <div class="nav">
     <button class="btn sec" data-go="1" type="button">이전</button>
@@ -384,18 +381,18 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:v
 /* ================= DATA ================= */
 
 const THEMES = {
-  make:      {ko:"만들기",   desc:"없던 걸 형태로 만들어내는 힘"},
-  structure: {ko:"구조화",   desc:"엉킨 것을 체계로 세우는 힘"},
-  teach:     {ko:"전달",     desc:"어려운 것을 쉽게 건네는 힘"},
-  persuade:  {ko:"각성",     desc:"관점을 흔들어 바꾸는 힘"},
-  connect:   {ko:"연결",     desc:"사람과 아이디어를 잇는 힘"},
-  care:      {ko:"돌봄",     desc:"한 사람의 변화를 곁에서 돕는 힘"},
-  explore:   {ko:"탐구",     desc:"끝까지 파고들어 알아내는 힘"},
-  execute:   {ko:"완수",     desc:"시작한 것을 기어코 끝내는 힘"},
-  improve:   {ko:"개선",     desc:"이미 있는 것을 더 낫게 만드는 힘"},
-  aesthetic: {ko:"심미",     desc:"감각으로 완성도를 올리는 힘"},
-  analyze:   {ko:"분석",     desc:"숫자와 패턴으로 판단하는 힘"},
-  pioneer:   {ko:"개척",     desc:"아무도 안 한 걸 먼저 여는 힘"}
+  make:      {ko:"만들기",   desc:"없던 걸 눈에 보이게 만들어내는 힘"},
+  structure: {ko:"정리",     desc:"엉킨 걸 순서대로 세우는 힘"},
+  teach:     {ko:"설명",     desc:"어려운 걸 쉽게 풀어 건네는 힘"},
+  persuade:  {ko:"설득",     desc:"사람 생각을 흔들어 바꾸는 힘"},
+  connect:   {ko:"연결",     desc:"사람과 사람을 이어붙이는 힘"},
+  care:      {ko:"돌봄",     desc:"한 사람이 달라지도록 곁에서 돕는 힘"},
+  explore:   {ko:"파고들기", desc:"궁금한 걸 끝까지 알아내는 힘"},
+  execute:   {ko:"끝내기",   desc:"시작한 걸 기어코 끝내는 힘"},
+  improve:   {ko:"고치기",   desc:"이미 있는 걸 더 낫게 만드는 힘"},
+  aesthetic: {ko:"감각",     desc:"보기 좋게 다듬어내는 힘"},
+  analyze:   {ko:"따져보기", desc:"숫자와 흐름을 보고 판단하는 힘"},
+  pioneer:   {ko:"먼저 하기", desc:"아무도 안 한 걸 먼저 해보는 힘"}
 };
 
 const ACTS = [
@@ -415,11 +412,15 @@ const ACTS = [
 
 /* 충전(N)에 가장 큰 가중치 — 과거 성공은 '기회'에 오염되지만 충전감은 오염되지 않는다 */
 const SIGNS = [
-  {k:"S", ko:"성공", w:1.0, hint:"결과가 유독 잘 나왔다"},
-  {k:"I", ko:"본능", w:1.2, hint:"시키지 않아도 손이 갔다"},
-  {k:"G", ko:"성장", w:1.1, hint:"배우는 속도가 남달랐다"},
-  {k:"N", ko:"충전", w:1.5, hint:"하고 나면 오히려 기운이 났다"}
+  {k:"S", ko:"결과가 잘 나왔다",        w:1.0},
+  {k:"I", ko:"시키지 않아도 하게 된다", w:1.2},
+  {k:"G", ko:"배우는 게 빨랐다",        w:1.1},
+  {k:"N", ko:"하고 나면 기운이 난다",   w:1.5}   // 가장 크게 본다
 ];
+
+// 먼저 해당되는지만 묻는다. 이유는 그렇다고 한 것에만 묻는다.
+// 48번 판단하게 만들면 대충 찍게 되고, 대충 찍은 답으로는 아무것도 못 읽는다.
+const AGREE3 = ["아니다", "조금", "그렇다"];
 
 const MOTIVES = {
   create:      {ko:"창조감", q:"무언가가 내 손에서 형태를 갖춰가는 그 과정 자체가 즐겁다."},
@@ -678,7 +679,7 @@ const POISON = [
 /* ================= STATE ================= */
 const KEY = "onething.v1";
 const S = {n:{}, sign:{}, mot:{}, after:[], ik:{}, ctx:{}};
-ACTS.forEach(a=>S.sign[a.k]={S:0,I:0,G:0,N:0});
+ACTS.forEach(a=>S.sign[a.k]={y:null, note:"", S:0,I:0,G:0,N:0});
 Object.keys(MOTIVES).forEach(k=>S.mot[k]=null);
 Object.keys(IKIGAI).forEach(k=>S.ik[k]=null);
 CTX.forEach(c=>S.ctx[c.k]=null);
@@ -699,26 +700,62 @@ function load(){
     Object.assign(S.n,d.n||{}); Object.assign(S.mot,d.mot||{}); Object.assign(S.ik,d.ik||{}); Object.assign(S.ctx,d.ctx||{});
     Object.assign(S.hyg,d.hyg||{}); Object.assign(S.strat,d.strat||{});
     S.after = d.after||[]; S.allocSay = d.allocSay||[]; S.allocDid = d.allocDid||[];
-    if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=d.sign[k]; });
+    if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=migrateSign(d.sign[k]); });
     buildAll(); toast("불러왔습니다"); return true;
   }catch(e){ toast("불러오기 실패"); return false; }
 }
 
 /* ================= BUILD FORM ================= */
+/* 이전 판에는 동의도가 없었다. 이유가 하나라도 체크돼 있으면 '그렇다'로 본다. */
+function migrateSign(o){
+  const st = {y:null, note:"", S:0,I:0,G:0,N:0, ...o};
+  if(st.y == null) st.y = SIGNS.some(sg=>st[sg.k]) ? 2 : null;
+  return st;
+}
+
 function buildSign(){
   const box = $("#signGrid"); box.innerHTML="";
   ACTS.forEach(a=>{
+    const st = S.sign[a.k];
     const card = el("div","signcard");
     card.appendChild(el("div","act","<b>"+THEMES[a.k].ko+"</b><span>"+a.t+"</span>"));
+
+    // 1단계 — 해당되나요
+    const row = el("div","opts");
+    AGREE3.forEach((lb,i)=>{
+      const b = el("button","opt",lb); b.type="button";
+      b.onclick=()=>{ st.y = i; render(); save(true); };
+      row.appendChild(b);
+    });
+    card.appendChild(row);
+
+    // 2단계 — 그렇다고 한 것에만 이유를 묻는다
+    const why = el("div","why-box");
+    why.appendChild(el("div","qs","왜 그런가요? 해당되는 것을 전부 골라주세요."));
     const sigs = el("div","sigs");
     SIGNS.forEach(sg=>{
-      const b = el("button","sig", sg.ko+" <span style='opacity:.72;font-size:11.5px'>"+sg.hint+"</span>");
-      b.type="button";
-      const sync=()=>{ b.classList.toggle("on", !!S.sign[a.k][sg.k]); card.classList.toggle("hot", SIGNS.some(x=>S.sign[a.k][x.k])); };
-      b.onclick=()=>{ S.sign[a.k][sg.k]=S.sign[a.k][sg.k]?0:1; sync(); save(true); };
-      sync(); sigs.appendChild(b);
+      const b = el("button","sig", esc(sg.ko)); b.type="button";
+      b.onclick=()=>{ st[sg.k]=st[sg.k]?0:1; b.classList.toggle("on", !!st[sg.k]); save(true); };
+      if(st[sg.k]) b.classList.add("on");
+      sigs.appendChild(b);
     });
-    card.appendChild(sigs); box.appendChild(card);
+    why.appendChild(sigs);
+    const note = el("input"); note.type="text"; note.placeholder="다른 이유가 있다면 적어주세요 (선택)";
+    note.style.marginTop="9px"; note.value = st.note || "";
+    note.oninput = ()=>{ st.note = note.value; save(true); };
+    why.appendChild(note);
+    card.appendChild(why);
+
+    function render(){
+      [...row.children].forEach((c,i)=>c.classList.toggle("on", st.y===i));
+      const open = st.y > 0;
+      why.classList.toggle("open", open);
+      card.classList.toggle("hot", open);
+      if(!open){ SIGNS.forEach(sg=>st[sg.k]=0); st.note=""; note.value="";
+                 [...sigs.children].forEach(c=>c.classList.remove("on")); }
+    }
+    render();
+    box.appendChild(card);
   });
 }
 
@@ -840,12 +877,15 @@ function computeThemes(){
   const txt = narrativeText();
   const out = {};
   Object.keys(THEMES).forEach(k=>{
-    let raw = 0;
-    SIGNS.forEach(sg=>{ if(S.sign[k] && S.sign[k][sg.k]) raw += sg.w; });      // 0 ~ 4.8
+    const st = S.sign[k] || {};
+    // 해당된다고 한 것 자체가 신호다. 이유를 못 고른 사람의 답도 버리지 않는다.
+    let raw = [0, 0.9, 1.8][st.y || 0];
+    SIGNS.forEach(sg=>{ if(st[sg.k]) raw += sg.w; });                          // + 0 ~ 4.8
     let hits = 0;
-    (LEX[k]||[]).forEach(w=>{ if(txt.indexOf(w)>=0) hits++; });
+    const own = txt + " " + (st.note || "");
+    (LEX[k]||[]).forEach(w=>{ if(own.indexOf(w)>=0) hits++; });
     raw += Math.min(hits,3) * 0.4;                                            // 최대 +1.2
-    out[k] = {raw, norm: Math.min(raw/5.4, 1), hits};
+    out[k] = {raw, norm: Math.min(raw/6.0, 1), hits};
   });
   return out;
 }
@@ -1158,7 +1198,7 @@ function renderResult(){
 
   h += '<section class="rsec"><h2>읽어낸 맥락</h2><p class="sub">이 문단이 틀렸다면 아래 전부가 틀립니다. 먼저 이것부터 확인하세요.</p><div class="card">'+summaryPara(P)+'</div></section>';
 
-  h += '<section class="rsec"><h2>당신의 강점</h2><p class="sub">체크한 신호를 가중합한 값입니다. 충전(하고 나면 기운이 나는가)에 가장 큰 가중치가 들어갑니다 — 과거의 성공은 기회 여부에 오염되지만, 충전감은 오염되지 않기 때문입니다.</p><div class="card">';
+  h += '<section class="rsec"><h2>당신이 잘하는 것</h2><p class="sub">답해주신 내용을 점수로 바꾼 것입니다. <b>하고 나면 기운이 나는가</b>를 가장 크게 봤습니다. 잘한 일은 그냥 기회가 있었던 것뿐일 수도 있지만, 하고 나서 기운 나는 건 거짓말을 못 하니까요.</p><div class="card">';
   themeRank.forEach((t,i)=> h += bar(THEMES[t.k].ko, t.v*100, i>=3));
   const topT = themeRank[0];
   h += '<p class="tiny" style="margin-top:14px">상위 세 개가 당신의 조합입니다. 하나만 보지 마세요. <b style="color:var(--ink)">'+THEMES[themeRank[0].k].ko+' × '+THEMES[themeRank[1].k].ko+'</b> 같은 조합이 남과 구별되는 지점을 만듭니다. 하나짜리 강점은 흔하지만 조합은 드뭅니다.';
@@ -1246,9 +1286,10 @@ document.addEventListener("click", e=>{
   if(b) go(parseInt(b.dataset.go,10));
 });
 $("#finishBtn").onclick = ()=>{
-  let checks = 0;
-  Object.values(S.sign).forEach(o=> SIGNS.forEach(s=> checks += o[s.k]?1:0));
-  if(checks < 3){ toast("2단계에서 최소 3개는 체크해 주세요"); go(2); return; }
+  const answered = Object.values(S.sign).filter(o=> o.y != null).length;
+  const yes = Object.values(S.sign).filter(o=> o.y > 0).length;
+  if(answered < 8){ toast("2단계를 끝까지 답해주세요 (아니다도 답입니다)"); go(2); return; }
+  if(yes < 2){ toast("2단계에서 해당되는 게 최소 두 개는 있어야 합니다"); go(2); return; }
   renderResult(); go(7);
 };
 $("#saveBtn").onclick = ()=> save();
@@ -1260,7 +1301,7 @@ $("#resetBtn").onclick = ()=>{
 };
 
 buildAll();
-try{ if(localStorage.getItem(KEY)){ const d=JSON.parse(localStorage.getItem(KEY)); Object.assign(S.n,d.n||{}); Object.assign(S.mot,d.mot||{}); Object.assign(S.ik,d.ik||{}); Object.assign(S.ctx,d.ctx||{}); S.after=d.after||[]; S.allocSay=d.allocSay||[]; S.allocDid=d.allocDid||[]; Object.assign(S.hyg,d.hyg||{}); Object.assign(S.strat,d.strat||{}); if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=d.sign[k]; }); buildAll(); } }catch(e){}
+try{ if(localStorage.getItem(KEY)){ const d=JSON.parse(localStorage.getItem(KEY)); Object.assign(S.n,d.n||{}); Object.assign(S.mot,d.mot||{}); Object.assign(S.ik,d.ik||{}); Object.assign(S.ctx,d.ctx||{}); S.after=d.after||[]; S.allocSay=d.allocSay||[]; S.allocDid=d.allocDid||[]; Object.assign(S.hyg,d.hyg||{}); Object.assign(S.strat,d.strat||{}); if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=migrateSign(d.sign[k]); }); buildAll(); } }catch(e){}
 </script>
 </body>
 </html>
