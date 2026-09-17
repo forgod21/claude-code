@@ -92,6 +92,10 @@ def db():
       id TEXT PRIMARY KEY, video_id TEXT, text TEXT, author TEXT,
       likes INTEGER, replies INTEGER, published TEXT);
     CREATE INDEX IF NOT EXISTS ix_c_video ON comment(video_id);
+    CREATE TABLE IF NOT EXISTS reply(
+      id TEXT PRIMARY KEY, parent_id TEXT, video_id TEXT, text TEXT,
+      author TEXT, likes INTEGER, published TEXT);
+    CREATE INDEX IF NOT EXISTS ix_r_parent ON reply(parent_id);
     """)
     return c
 
@@ -150,7 +154,7 @@ def fetch_comments(con, vid, cap=2000):
     """한 영상의 댓글을 페이지 단위로 받아 쌓는다."""
     got, tok = 0, None
     while True:
-        r = call("commentThreads", part="snippet", videoId=vid, maxResults=100,
+        r = call("commentThreads", part="snippet,replies", videoId=vid, maxResults=100,
                  order="relevance", textFormat="plainText",
                  **({"pageToken": tok} if tok else {}))
         if r.get("_disabled"):
@@ -163,6 +167,12 @@ def fetch_comments(con, vid, cap=2000):
                          int(sn.get("likeCount", 0) or 0),
                          int(th["snippet"].get("totalReplyCount", 0) or 0),
                          sn.get("publishedAt", "")))
+            for rp in (th.get("replies", {}) or {}).get("comments", []):
+                rs = rp["snippet"]
+                con.execute("INSERT OR REPLACE INTO reply VALUES(?,?,?,?,?,?,?)",
+                            (rp["id"], th["id"], vid, rs.get("textDisplay", ""),
+                             rs.get("authorDisplayName", ""),
+                             int(rs.get("likeCount", 0) or 0), rs.get("publishedAt", "")))
             got += 1
         tok = r.get("nextPageToken")
         if not tok or got >= cap:
@@ -347,13 +357,18 @@ def brief(target, out_path, per=14):
                  + "\n".join(f"  {i}  {t[:52]}" for i, t in have))
     vid, title, dur, views, ncom = row
 
-    cs = con.execute("SELECT text,likes,replies FROM comment WHERE video_id=?", (vid,)).fetchall()
+    cs = con.execute("SELECT id,text,likes,replies FROM comment WHERE video_id=?", (vid,)).fetchall()
+    rmap = defaultdict(list)
+    for pid, rt, rl in con.execute(
+            "SELECT parent_id,text,likes FROM reply WHERE video_id=? ORDER BY likes DESC", (vid,)):
+        rmap[pid].append((rt or "").strip())
     rich = []
-    for text, likes, replies in cs:
+    for cid, text, likes, replies in cs:
         t = (text or "").strip()
         typ, tags = classify(t)
         rich.append({"t": t, "l": likes, "r": replies, "typ": typ, "g": tags,
-                     "fmt": bool(RX_FORMAT.search(t)), "ts": timestamps(t)})
+                     "fmt": bool(RX_FORMAT.search(t)), "ts": timestamps(t),
+                     "rep": rmap.get(cid, [])[:3]})
 
     def pick(f, key, k=per, minlen=8):
         seen, out = set(), []
@@ -419,7 +434,14 @@ def brief(target, out_path, per=14):
     ]:
         L += [f"## {head}", f"*{hint}*", ""]
         got = pick(f, sortk)
-        L += [f"- (♥{d['l']} 답{d['r']}) {d['t'][:220]}" for d in got] or ["- 잡힌 것이 없습니다."]
+        if not got:
+            L.append("- 잡힌 것이 없습니다.")
+        for d in got:
+            L.append(f"- (♥{d['l']} 답{d['r']}) {d['t'][:220]}")
+            # 논쟁 축에서는 답글 원문이 있어야 '무슨 논쟁인지'가 잡힌다
+            if key == "contest":
+                for rt in d["rep"]:
+                    L.append(f"    └ {rt[:160]}")
         L.append("")
 
     L += ["## 7. 시청자의 말 (제목에 없는 반복 표현)",
