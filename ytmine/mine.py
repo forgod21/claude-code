@@ -198,6 +198,11 @@ RX = {
     "alt": re.compile(r"(앱|어플|프로그램|제품|보조제|영양제|채널|유튜브|클래스)"
                       r".{0,12}(써봤|해봤|먹어봤|봤는데|썼는데|쓰는데|사용|결제)"),
 }
+
+# 내용이 아니라 '영상 만듦새'에 대한 마찰. 같은 주제를 더 잘 전달할 여지가 여기 있다.
+RX_FORMAT = re.compile(r"너무\s?길|길어|짧게|결론부터|본론|늘어지|지루|반복되는|"
+                       r"배경음|브금|BGM|소리가|음량|목소리|발음|자막|화질|편집|"
+                       r"빨리\s?감|스킵|넘겨|요약본|정리본")
 SHORT_PRAISE = re.compile(r"^.{0,18}(감사|최고|화이팅|파이팅|응원|잘\s?봤|좋아요|굿|대박|👍|❤)")
 
 
@@ -265,6 +270,122 @@ def heatmap(rows, dur, bins=40):
         i = min(bins - 1, int(sec / dur * bins))
         h[i] += 1 + math.log10(1 + max(0, likes)) * 2
     return h, dur
+
+
+# ---------------------------------------------------------------- brief
+# 댓글을 '의미 있는 정보'로 바꾸는 자리. 아웃라이어를 넘어서는 요인은
+# 아래 여섯 형태로만 나온다 — 그래서 여섯 축으로만 뽑는다.
+AXES = [
+    ("peak",    "감정이 터진 지점",  "그 대목의 장치를 내 구조에 심는다"),
+    ("unmet",   "채워지지 않은 구멍", "터졌는데도 답 안 한 것 = 내 다음 한 편"),
+    ("segment", "빠진 청중",        "원 영상이 안 겨냥한 집단 = 좁지만 확실한 승부처"),
+    ("contest", "갈린 각도",        "논쟁 지점 = 내가 더 잘 다룰 자리"),
+    ("format",  "만듦새 불만",      "같은 내용을 더 잘 전달할 여지"),
+    ("vocab",   "시청자의 말",      "제목·썸네일에 그대로 쓸 표현"),
+]
+
+
+def vid_id(x):
+    """URL이든 ID든 받는다."""
+    m = re.search(r"(?:v=|youtu\.be/|shorts/|embed/)([A-Za-z0-9_-]{11})", x or "")
+    return m.group(1) if m else x.strip()
+
+
+def brief(target, out_path, per=14):
+    con = db()
+    vid = vid_id(target)
+    row = con.execute("SELECT id,title,dur,views,comments FROM video WHERE id=?", (vid,)).fetchone()
+    if not row:
+        have = con.execute("SELECT id,title FROM video WHERE done=1 ORDER BY views DESC LIMIT 12").fetchall()
+        sys.exit("그 영상은 수집되어 있지 않습니다. 먼저 collect 를 돌리세요.\n수집된 영상:\n"
+                 + "\n".join(f"  {i}  {t[:52]}" for i, t in have))
+    vid, title, dur, views, ncom = row
+
+    cs = con.execute("SELECT text,likes,replies FROM comment WHERE video_id=?", (vid,)).fetchall()
+    rich = []
+    for text, likes, replies in cs:
+        t = (text or "").strip()
+        typ, tags = classify(t)
+        rich.append({"t": t, "l": likes, "r": replies, "typ": typ, "g": tags,
+                     "fmt": bool(RX_FORMAT.search(t)), "ts": timestamps(t)})
+
+    def pick(f, key, k=per, minlen=8):
+        seen, out = set(), []
+        for d in sorted([x for x in rich if f(x)], key=key, reverse=True):
+            sig = re.sub(r"[^가-힣]", "", d["t"])[:18]      # 같은 말 중복 제거
+            if len(d["t"]) < minlen or sig in seen:
+                continue
+            seen.add(sig); out.append(d)
+            if len(out) >= k:
+                break
+        return out
+
+    # 감정 피크
+    marks = [(d["t"], s, d["l"]) for d in rich for s in d["ts"]]
+    peaks = []
+    if len(marks) >= 4:
+        bins = 40
+        h, dur2 = heatmap(marks, dur, bins)
+        slot, used = dur2 / bins, set()
+        for i in sorted(range(bins), key=lambda i: -h[i]):
+            if h[i] <= 0 or len(peaks) >= 3:
+                break
+            if i in used:
+                continue
+            used.update(range(i - 2, i + 3))
+            near = sorted([m for m in marks if (i - 1) * slot <= m[1] < (i + 2) * slot],
+                          key=lambda m: -m[2])[:5]
+            peaks.append((int(i * slot), [(TS_LEAD.sub("", t)[:160], sec, lk) for t, sec, lk in near]))
+
+    # 시청자의 말 — 제목에 없는데 댓글에 반복되는 표현이 곧 제목 후보다
+    tl = set(tokens(title))
+    vocab = Counter()
+    for d in rich:
+        if d["typ"] != "react":
+            vocab.update({w: 1 + min(d["l"], 50) for w in set(tokens(d["t"])) if w not in tl})
+
+    L = [f"# 아웃라이어 초과 브리프 — 원자료", "",
+         f"- 영상: **{title}**", f"- 조회 {views:,} · 댓글 {ncom:,} · 수집 {len(cs):,} · 길이 {dur // 60}:{dur % 60:02d}",
+         "", "> 아래는 가공하지 않은 증거입니다. 요약은 뭉개므로 원문 그대로 둡니다.", ""]
+
+    L += ["## 1. 감정이 터진 지점", ""]
+    if peaks:
+        for at, near in peaks:
+            L.append(f"### {at // 60}:{at % 60:02d}")
+            L += [f"- ({sec // 60}:{sec % 60:02d}, ♥{lk}) {t}" for t, sec, lk in near]
+            L.append("")
+    else:
+        L += ["- 재생 시각이 박힌 댓글이 거의 없습니다. 이 영상은 특정 대목이 아니라 전체로 소비된 듯합니다.", ""]
+
+    for key, head, hint, f, sortk in [
+        ("unmet", "2. 채워지지 않은 구멍 (질문)", "터졌는데도 답 안 한 것",
+         lambda d: "question" in d["g"], lambda d: (d["l"], d["r"])),
+        ("segment", "3. 빠진 청중 (상황 고백)", "원 영상이 겨냥하지 않은 집단",
+         lambda d: "situation" in d["g"], lambda d: (d["l"], d["r"])),
+        ("fail", "4. 깨진 지점 (실패 경험)", "기존 해법이 통하지 않은 자리",
+         lambda d: "fail" in d["g"], lambda d: (d["l"], d["r"])),
+        # 단순 반응에 달린 대댓글은 논쟁이 아니라 동의다. 시각만 찍은 댓글도 마찬가지.
+        ("contest", "5. 갈린 각도 (대댓글 많은 댓글)", "의견이 갈린 곳",
+         lambda d: d["r"] > 0 and d["typ"] != "react" and not d["ts"],
+         lambda d: (d["r"], d["l"])),
+        ("format", "6. 만듦새 불만", "같은 내용을 더 잘 전달할 여지",
+         lambda d: d["fmt"], lambda d: (d["l"], d["r"])),
+    ]:
+        L += [f"## {head}", f"*{hint}*", ""]
+        got = pick(f, sortk)
+        L += [f"- (♥{d['l']} 답{d['r']}) {d['t'][:220]}" for d in got] or ["- 잡힌 것이 없습니다."]
+        L.append("")
+
+    L += ["## 7. 시청자의 말 (제목에 없는 반복 표현)",
+          "*좋아요로 가중한 빈도. 제목·썸네일 문구 후보입니다.*", "",
+          "  ".join(f"`{w}`({n})" for w, n in vocab.most_common(30)), ""]
+
+    body = "\n".join(L)
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(body)
+    print(f"브리프 원자료 → {out_path}  ({len(body):,}자)")
+    print("\n다음 단계 — 이 파일과 prompts/brief.md 를 함께 LLM에 넘기면")
+    print("여섯 축으로 묶인 '무엇을 더 얹을 것인가' 브리프가 나옵니다.")
 
 
 # ---------------------------------------------------------------- report
@@ -629,8 +750,12 @@ if __name__ == "__main__":
     c = sub.add_parser("collect"); c.add_argument("channels", nargs="+")
     c.add_argument("--videos", type=int, default=30, help="채널당 최근 영상 수 (기본 30)")
     r = sub.add_parser("report"); r.add_argument("--out", default="dashboard.html")
+    b = sub.add_parser("brief"); b.add_argument("video", help="영상 URL 또는 ID")
+    b.add_argument("--out", default="brief_input.md")
     a = ap.parse_args()
     if a.cmd == "collect":
         collect(a.channels, a.videos)
+    elif a.cmd == "brief":
+        brief(a.video, a.out)
     else:
         report(a.out)
