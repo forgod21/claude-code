@@ -106,6 +106,63 @@ def resolve_channel(handle):
     }
 
 
+def collect_videos(ids):
+    """영상 URL/ID 여러 개를 직접 긁는다. 아웃라이어 한 편만 볼 때 쓴다."""
+    con = db()
+    ids = [vid_id(x) for x in ids]
+    for i in range(0, len(ids), 50):
+        r = call("videos", part="snippet,statistics,contentDetails", id=",".join(ids[i:i + 50]))
+        for it in r.get("items", []):
+            st = it.get("statistics", {})
+            con.execute(
+                "INSERT OR IGNORE INTO video(id,channel_id,title,published,views,comments,dur) "
+                "VALUES(?,?,?,?,?,?,?)",
+                (it["id"], it["snippet"]["channelId"], it["snippet"]["title"],
+                 it["snippet"]["publishedAt"], int(st.get("viewCount", 0) or 0),
+                 int(st.get("commentCount", 0) or 0),
+                 iso_dur(it.get("contentDetails", {}).get("duration", ""))))
+            con.execute("INSERT OR IGNORE INTO channel VALUES(?,?,?,0)",
+                        (it["snippet"]["channelId"], it["snippet"].get("channelTitle", ""), ""))
+    con.commit()
+    missing = [v for v in ids if not con.execute(
+        "SELECT 1 FROM video WHERE id=?", (v,)).fetchone()]
+    if missing:
+        print(f"[경고] 찾지 못한 영상: {', '.join(missing)}")
+    for vid, title, ncom in con.execute(
+            "SELECT id,title,comments FROM video WHERE id IN (%s) AND done=0"
+            % ",".join("?" * len(ids)), ids).fetchall():
+        got = fetch_comments(con, vid)
+        print(f"   {title[:44]:<46} 댓글 {got:>5}   (누적 {_spent}유닛)")
+    total = con.execute("SELECT COUNT(*) FROM comment").fetchone()[0]
+    print(f"\n완료. 저장된 댓글 {total:,}개 · 이번에 쓴 유닛 약 {_spent} (하루 한도 10,000)")
+
+
+def fetch_comments(con, vid, cap=2000):
+    """한 영상의 댓글을 페이지 단위로 받아 쌓는다."""
+    got, tok = 0, None
+    while True:
+        r = call("commentThreads", part="snippet", videoId=vid, maxResults=100,
+                 order="relevance", textFormat="plainText",
+                 **({"pageToken": tok} if tok else {}))
+        if r.get("_disabled"):
+            break
+        for th in r.get("items", []):
+            sn = th["snippet"]["topLevelComment"]["snippet"]
+            con.execute("INSERT OR REPLACE INTO comment VALUES(?,?,?,?,?,?,?)",
+                        (th["id"], vid, sn.get("textDisplay", ""),
+                         sn.get("authorDisplayName", ""),
+                         int(sn.get("likeCount", 0) or 0),
+                         int(th["snippet"].get("totalReplyCount", 0) or 0),
+                         sn.get("publishedAt", "")))
+            got += 1
+        tok = r.get("nextPageToken")
+        if not tok or got >= cap:
+            break
+    con.execute("UPDATE video SET done=1 WHERE id=?", (vid,))
+    con.commit()
+    return got
+
+
 def collect(handles, n_videos):
     con = db()
     for handle in handles:
@@ -146,28 +203,8 @@ def collect(handles, n_videos):
             "SELECT id,title,comments FROM video WHERE channel_id=? AND done=0 "
             "ORDER BY comments DESC", (ch["id"],)).fetchall()
         for vid, title, ncom in todo:
-            got, tok = 0, None
-            while True:
-                r = call("commentThreads", part="snippet", videoId=vid, maxResults=100,
-                         order="relevance", textFormat="plainText",
-                         **({"pageToken": tok} if tok else {}))
-                if r.get("_disabled"):
-                    break
-                for th in r.get("items", []):
-                    s = th["snippet"]["topLevelComment"]["snippet"]
-                    con.execute("INSERT OR REPLACE INTO comment VALUES(?,?,?,?,?,?,?)",
-                                (th["id"], vid, s.get("textDisplay", ""),
-                                 s.get("authorDisplayName", ""),
-                                 int(s.get("likeCount", 0) or 0),
-                                 int(th["snippet"].get("totalReplyCount", 0) or 0),
-                                 s.get("publishedAt", "")))
-                    got += 1
-                tok = r.get("nextPageToken")
-                if not tok or got >= 500:
-                    break
-            con.execute("UPDATE video SET done=1 WHERE id=?", (vid,))
-            con.commit()
-            print(f"   {title[:44]:<46} 댓글 {got:>4}   (누적 {_spent}유닛)")
+            got = fetch_comments(con, vid, cap=500)
+            print(f"   {title[:44]:<46} 댓글 {got:>5}   (누적 {_spent}유닛)")
     total = con.execute("SELECT COUNT(*) FROM comment").fetchone()[0]
     print(f"\n완료. 저장된 댓글 {total:,}개 · 이번에 쓴 유닛 약 {_spent} (하루 한도 10,000)")
 
@@ -747,14 +784,26 @@ draw();
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="유튜브 댓글에서 마찰을 캐낸다")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    c = sub.add_parser("collect"); c.add_argument("channels", nargs="+")
+    c = sub.add_parser("collect"); c.add_argument("targets", nargs="+",
+        help="채널(@핸들 또는 UC…) 또는 영상 URL/ID. 섞어 써도 됩니다")
     c.add_argument("--videos", type=int, default=30, help="채널당 최근 영상 수 (기본 30)")
     r = sub.add_parser("report"); r.add_argument("--out", default="dashboard.html")
     b = sub.add_parser("brief"); b.add_argument("video", help="영상 URL 또는 ID")
     b.add_argument("--out", default="brief_input.md")
-    a = ap.parse_args()
+    # 유튜브 ID는 '-'로 시작할 수 있다(-2fagsF-gzo). 그대로 두면 argparse가
+    # 옵션으로 오해하므로 URL 꼴로 바꿔서 넘긴다. vid_id 가 다시 풀어낸다.
+    argv = [f"https://youtu.be/{t}" if re.fullmatch(r"-[A-Za-z0-9_-]{10}", t) else t
+            for t in sys.argv[1:]]
+    a = ap.parse_args(argv)
     if a.cmd == "collect":
-        collect(a.channels, a.videos)
+        # 채널이면 채널 경로, 영상 URL/ID면 영상 경로로 자동 분기
+        chans = [t for t in a.targets if t.startswith("@") or
+                 (t.startswith("UC") and len(t) == 24)]
+        vids = [t for t in a.targets if t not in chans]
+        if chans:
+            collect(chans, a.videos)
+        if vids:
+            collect_videos(vids)
     elif a.cmd == "brief":
         brief(a.video, a.out)
     else:
