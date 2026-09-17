@@ -27,11 +27,20 @@ COST = {"channels": 1, "playlistItems": 1, "videos": 1, "commentThreads": 1, "se
 _spent = 0
 
 
+# 키를 담는 환경변수 이름은 사람마다 다르다. 흔한 것들을 모두 받는다.
+KEY_VARS = ("YT_API_KEY", "YOUTUBE_API_KEY", "GOOGLE_API_KEY",
+            "YOUTUBE_DATA_API_KEY", "GOOGLE_YOUTUBE_API_KEY")
+
+
 def key():
-    k = os.environ.get("YT_API_KEY")
-    if not k:
-        sys.exit("YT_API_KEY 환경변수가 없습니다.  export YT_API_KEY='...'")
-    return k
+    for v in KEY_VARS:
+        k = (os.environ.get(v) or "").strip()
+        if k:
+            return k
+    sys.exit("유튜브 API 키를 찾지 못했습니다. 아래 중 하나에 넣어주세요:\n  "
+             + "\n  ".join(KEY_VARS)
+             + "\n\n예:  export YT_API_KEY='...'\n"
+             "이미 다른 이름으로 쓰고 있다면 그 이름으로 한 번 더 export 하면 됩니다.")
 
 
 def call(endpoint, **params):
