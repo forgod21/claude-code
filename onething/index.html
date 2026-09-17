@@ -85,8 +85,8 @@ textarea::placeholder{color:var(--ink-3)}
 /* sign grid */
 .signcard{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin:9px 0;background:var(--bg-soft);transition:border-color .2s,background .2s}
 .signcard.hot{border-color:var(--accent-line);background:var(--accent-soft)}
-.signcard .act{font-weight:650;font-size:15.5px;margin-bottom:9px;display:flex;gap:8px;align-items:baseline}
-.signcard .act b{color:var(--accent);font-size:12px;font-weight:700;flex:none}
+.signcard .act{font-weight:650;font-size:15.5px;margin-bottom:9px;line-height:1.55}
+.signcard .eg{font-size:12.5px;color:var(--ink-3);margin:-5px 0 10px}
 .why-box{display:none;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line)}
 .why-box.open{display:block;animation:in .22s ease}
 .signcard .opts{margin-top:2px}
@@ -255,11 +255,11 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:v
 <!-- ========== STEP 2 : SIGN ========== -->
 <section class="step" id="s2">
   <div class="stepnum">STEP 2 / 6 · 잘하는 것</div>
-  <h2>이런 일, 나한테 해당되나요</h2>
+  <h2>이런 적, 있으세요?</h2>
   <p class="muted" style="font-size:15px">
-    12가지 일을 하나씩 보고 <b>해당되는지만 먼저</b> 골라주세요.
-    해당된다고 하신 것만 "왜 그런가요?"를 한 번 더 여쭤봅니다.
-    아닌 건 그냥 <b>아니다</b>를 누르고 넘어가시면 됩니다.
+    좋아하는지 묻지 않습니다. <b>실제로 그런 적이 있었는지만</b> 떠올려 주세요.
+    있었다고 하신 것만 "그때 어땠나요?"를 한 번 더 여쭤봅니다.
+    없으면 <b>없다</b> 누르고 넘어가시면 됩니다.
   </p>
   <div id="signGrid"></div>
   <div class="nav">
@@ -396,31 +396,33 @@ const THEMES = {
 };
 
 const ACTS = [
-  {k:"make",      t:"없던 걸 처음부터 만들어내기"},
-  {k:"structure", t:"엉킨 정보를 체계로 정리하기"},
-  {k:"teach",     t:"어려운 개념을 쉽게 설명하기"},
-  {k:"persuade",  t:"사람의 생각을 흔드는 이야기 하기"},
-  {k:"connect",   t:"사람과 사람, 아이디어를 잇기"},
-  {k:"care",      t:"한 사람의 변화를 옆에서 돕기"},
-  {k:"explore",   t:"궁금한 걸 끝까지 파고들기"},
-  {k:"execute",   t:"시작한 일을 기어코 끝내기"},
-  {k:"improve",   t:"이미 있는 걸 더 낫게 고치기"},
-  {k:"aesthetic", t:"보기 좋게, 감각적으로 다듬기"},
-  {k:"analyze",   t:"숫자와 패턴으로 판단하기"},
-  {k:"pioneer",   t:"아무도 안 하던 걸 먼저 해보기"}
+  {k:"make",      t:"필요한 게 없어서 직접 만들어 쓴 적이 있다",
+                  eg:"엑셀 양식, 앱, 선반, 나만의 레시피 뭐든"},
+  {k:"structure", t:"시키지도 않았는데 뒤죽박죽인 걸 내 방식대로 정리해둔 적이 있다",
+                  eg:"파일, 사진첩, 서랍, 일정표"},
+  {k:"teach",     t:"설명해줬더니 \u201c아 이제 알겠다\u201d는 말을 들은 적이 있다"},
+  {k:"persuade",  t:"내 이야기를 듣고 생각을 바꾼 사람이 있다"},
+  {k:"connect",   t:"내가 소개해서 두 사람이 실제로 만난 적이 있다"},
+  {k:"care",      t:"힘들어하는 사람 곁에 끝까지 남아본 적이 있다"},
+  {k:"explore",   t:"하나가 궁금해서 찾다가 밤을 새운 적이 있다"},
+  {k:"execute",   t:"다들 중간에 놓은 일을 나 혼자 끝낸 적이 있다"},
+  {k:"improve",   t:"남이 해놓은 걸 보고 답답해서 내가 고쳐놓은 적이 있다"},
+  {k:"aesthetic", t:"남들은 괜찮다는데 나만 거슬려서 계속 다듬은 적이 있다"},
+  {k:"analyze",   t:"느낌으로 말고 숫자를 세어보고 결정한 적이 있다"},
+  {k:"pioneer",   t:"주변에 아무도 안 하던 걸 내가 먼저 해본 적이 있다"}
 ];
 
 /* 충전(N)에 가장 큰 가중치 — 과거 성공은 '기회'에 오염되지만 충전감은 오염되지 않는다 */
 const SIGNS = [
   {k:"S", ko:"결과가 잘 나왔다",        w:1.0},
-  {k:"I", ko:"시키지 않아도 하게 된다", w:1.2},
-  {k:"G", ko:"배우는 게 빨랐다",        w:1.1},
-  {k:"N", ko:"하고 나면 기운이 난다",   w:1.5}   // 가장 크게 본다
+  {k:"I", ko:"아무도 안 시켰는데 했다", w:1.2},
+  {k:"G", ko:"금방 익혔다",             w:1.1},
+  {k:"N", ko:"하고 나서 기운이 났다",   w:1.5}   // 가장 크게 본다
 ];
 
 // 먼저 해당되는지만 묻는다. 이유는 그렇다고 한 것에만 묻는다.
 // 48번 판단하게 만들면 대충 찍게 되고, 대충 찍은 답으로는 아무것도 못 읽는다.
-const AGREE3 = ["아니다", "조금", "그렇다"];
+const AGREE3 = ["없다", "한두 번", "여러 번"];
 
 const MOTIVES = {
   create:      {ko:"창조감", q:"무언가가 내 손에서 형태를 갖춰가는 그 과정 자체가 즐겁다."},
@@ -718,7 +720,8 @@ function buildSign(){
   ACTS.forEach(a=>{
     const st = S.sign[a.k];
     const card = el("div","signcard");
-    card.appendChild(el("div","act","<b>"+THEMES[a.k].ko+"</b><span>"+a.t+"</span>"));
+    card.appendChild(el("div","act","<span>"+esc(a.t)+"</span>"));
+    if(a.eg) card.appendChild(el("div","eg", esc(a.eg)));
 
     // 1단계 — 해당되나요
     const row = el("div","opts");
@@ -731,7 +734,7 @@ function buildSign(){
 
     // 2단계 — 그렇다고 한 것에만 이유를 묻는다
     const why = el("div","why-box");
-    why.appendChild(el("div","qs","왜 그런가요? 해당되는 것을 전부 골라주세요."));
+    why.appendChild(el("div","qs","그때 어땠나요? 해당되는 걸 전부 골라주세요."));
     const sigs = el("div","sigs");
     SIGNS.forEach(sg=>{
       const b = el("button","sig", esc(sg.ko)); b.type="button";
@@ -740,7 +743,7 @@ function buildSign(){
       sigs.appendChild(b);
     });
     why.appendChild(sigs);
-    const note = el("input"); note.type="text"; note.placeholder="다른 이유가 있다면 적어주세요 (선택)";
+    const note = el("input"); note.type="text"; note.placeholder="어떤 일이었는지 한 줄만 적어주셔도 좋아요 (선택)";
     note.style.marginTop="9px"; note.value = st.note || "";
     note.oninput = ()=>{ st.note = note.value; save(true); };
     why.appendChild(note);
