@@ -86,7 +86,8 @@ textarea::placeholder{color:var(--ink-3)}
 .signcard{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin:9px 0;background:var(--bg-soft);transition:border-color .2s,background .2s}
 .signcard.hot{border-color:var(--accent-line);background:var(--accent-soft)}
 .signcard .act{font-weight:650;font-size:15.5px;margin-bottom:9px;line-height:1.55}
-.signcard .eg{font-size:12.5px;color:var(--ink-3);margin:-5px 0 10px}
+.signcard .eg{font-size:12.5px;color:var(--ink-3);margin:-4px 0 11px;line-height:1.6;
+  padding-left:10px;border-left:2px solid var(--line)}
 .why-box{display:none;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line)}
 .why-box.open{display:block;animation:in .22s ease}
 .signcard .opts{margin-top:2px}
@@ -258,8 +259,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:v
   <h2>이런 적, 있으세요?</h2>
   <p class="muted" style="font-size:15px">
     좋아하는지 묻지 않습니다. <b>실제로 그런 적이 있었는지만</b> 떠올려 주세요.
+    아래 예시 중 하나라도 걸리는 게 있으면 <b>있었던 겁니다</b>. 없으면 그냥 <b>없다</b> 누르고 넘어가세요.
     있었다고 하신 것만 "그때 어땠나요?"를 한 번 더 여쭤봅니다.
-    없으면 <b>없다</b> 누르고 넘어가시면 됩니다.
   </p>
   <div id="signGrid"></div>
   <div class="nav">
@@ -397,19 +398,29 @@ const THEMES = {
 
 const ACTS = [
   {k:"make",      t:"필요한 게 없어서 직접 만들어 쓴 적이 있다",
-                  eg:"엑셀 양식, 앱, 선반, 나만의 레시피 뭐든"},
-  {k:"structure", t:"시키지도 않았는데 뒤죽박죽인 걸 내 방식대로 정리해둔 적이 있다",
-                  eg:"파일, 사진첩, 서랍, 일정표"},
-  {k:"teach",     t:"설명해줬더니 \u201c아 이제 알겠다\u201d는 말을 들은 적이 있다"},
-  {k:"persuade",  t:"내 이야기를 듣고 생각을 바꾼 사람이 있다"},
-  {k:"connect",   t:"내가 소개해서 두 사람이 실제로 만난 적이 있다"},
-  {k:"care",      t:"힘들어하는 사람 곁에 끝까지 남아본 적이 있다"},
-  {k:"explore",   t:"하나가 궁금해서 찾다가 밤을 새운 적이 있다"},
-  {k:"execute",   t:"다들 중간에 놓은 일을 나 혼자 끝낸 적이 있다"},
-  {k:"improve",   t:"남이 해놓은 걸 보고 답답해서 내가 고쳐놓은 적이 있다"},
-  {k:"aesthetic", t:"남들은 괜찮다는데 나만 거슬려서 계속 다듬은 적이 있다"},
-  {k:"analyze",   t:"느낌으로 말고 숫자를 세어보고 결정한 적이 있다"},
-  {k:"pioneer",   t:"주변에 아무도 안 하던 걸 내가 먼저 해본 적이 있다"}
+                  eg:"내 방식대로 짠 가계부 양식 · 직접 짠 선반 · 나만의 레시피 · 없어서 만든 앱"},
+  {k:"structure", t:"뒤죽박죽인 걸 시키지도 않았는데 정리해둔 적이 있다",
+                  eg:"사진첩을 날짜별로 · 냉장고 칸 나누기 · 단톡방 공지 다시 쓰기 · 회사 파일 정리"},
+  {k:"teach",     t:"설명해줬더니 \u201c아 이제 알겠다\u201d는 말을 들은 적이 있다",
+                  eg:"부모님께 휴대폰 기능 · 후배에게 일 알려주기 · 친구에게 청약이나 보험 설명"},
+  {k:"persuade",  t:"내 말을 듣고 마음을 바꾼 사람이 있다",
+                  eg:"안 간다던 사람을 병원에 보냄 · 반대하던 가족을 돌려세움 · 회의에서 결정을 뒤집음"},
+  {k:"connect",   t:"내가 소개해서 두 사람이 실제로 만난 적이 있다",
+                  eg:"일 구하는 친구에게 사람 연결 · 모임에서 둘을 붙여줌 · 좋은 가게나 선생님 추천"},
+  {k:"care",      t:"힘들어하는 사람 곁에 끝까지 남아본 적이 있다",
+                  eg:"몇 달을 들어준 친구 · 아픈 가족 병원 같이 다니기 · 그만두려던 사람 붙잡기"},
+  {k:"explore",   t:"하나가 궁금해서 찾다 보니 시간 가는 줄 몰랐던 적이 있다",
+                  eg:"증상 하나 검색하다 새벽 · 여행지 정보 다 뒤지기 · 물건 하나 사려고 리뷰 백 개"},
+  {k:"execute",   t:"다들 흐지부지된 일을 나 혼자 끝낸 적이 있다",
+                  eg:"모임 총무 · 이사나 결혼 준비 마무리 · 아무도 안 하던 정산"},
+  {k:"improve",   t:"남이 해놓은 걸 보고 답답해서 내가 고쳐놓은 적이 있다",
+                  eg:"회사 양식 다시 만들기 · 집 동선 바꾸기 · 설명서 다시 쓰기"},
+  {k:"aesthetic", t:"남들은 괜찮다는데 나만 거슬려서 계속 다듬은 적이 있다",
+                  eg:"사진 색감 · 자료 줄 맞추기 · 가구 위치 · 글자 크기와 간격"},
+  {k:"analyze",   t:"느낌 말고 기록이나 숫자를 들여다보고 결정한 적이 있다",
+                  eg:"가계부 보고 어디서 새는지 찾기 · 통신비 보험료 비교표 만들기 · 체중이나 운동 기록 보고 뭐가 효과 있었는지 따지기"},
+  {k:"pioneer",   t:"주변에 아무도 안 하던 걸 내가 먼저 해본 적이 있다",
+                  eg:"동네에서 처음 해본 것 · 회사에 먼저 들여온 방식 · 유행하기 전에 시작한 취미"}
 ];
 
 /* 충전(N)에 가장 큰 가중치 — 과거 성공은 '기회'에 오염되지만 충전감은 오염되지 않는다 */
@@ -721,7 +732,7 @@ function buildSign(){
     const st = S.sign[a.k];
     const card = el("div","signcard");
     card.appendChild(el("div","act","<span>"+esc(a.t)+"</span>"));
-    if(a.eg) card.appendChild(el("div","eg", esc(a.eg)));
+    if(a.eg) card.appendChild(el("div","eg", "예를 들면 &nbsp;" + esc(a.eg)));
 
     // 1단계 — 해당되나요
     const row = el("div","opts");
