@@ -1036,6 +1036,13 @@ function scorePaths(th, mot, ik, ctx){
   }).sort((a,b)=> b.fit-a.fit);
 }
 
+function josa(w, withBatchim, without){
+  const ch = (w || "").trim().slice(-1);
+  const c = ch.charCodeAt(0);
+  if(!ch || isNaN(c) || c < 0xAC00 || c > 0xD7A3) return without;
+  return ((c - 0xAC00) % 28) ? withBatchim : without;
+}
+
 function topEntries(obj, valFn, n){
   return Object.entries(obj).map(([k,v])=>({k, v:valFn(v)})).sort((a,b)=>b.v-a.v).slice(0,n);
 }
@@ -1139,7 +1146,7 @@ function summaryPara(P){
   const lowM = topEntries(P.mot, v=>-v, 1)[0];
   const ikLow = topEntries(P.ik, v=>-v, 1)[0];
   const out = [];
-  out.push("당신의 힘은 <b>"+THEMES[t[0].k].ko+"</b>과(와) <b>"+THEMES[t[1].k].ko+"</b>에 몰려 있습니다. "+THEMES[t[0].k].desc+", 그리고 "+THEMES[t[1].k].desc+"입니다.");
+  out.push("당신의 힘은 <b>"+THEMES[t[0].k].ko+"</b>"+josa(THEMES[t[0].k].ko,"과","와")+" <b>"+THEMES[t[1].k].ko+"</b>에 몰려 있습니다. "+THEMES[t[0].k].desc+", 그리고 "+THEMES[t[1].k].desc+"입니다.");
   out.push("그 힘을 굴리는 연료는 <b>"+MOTIVES[m[0].k].ko+"</b>이고, 그 다음이 "+MOTIVES[m[1].k].ko+"입니다. 반대로 <b>"+MOTIVES[lowM.k].ko+"</b>은 당신의 연료가 아닙니다. 이 한 줄이 남의 성공법이 당신에게 안 통했던 이유의 절반쯤을 설명합니다.");
   out.push("지금 당신의 자리는 <b>"+CTXLABEL("time")+"</b>, 노출은 <b>"+CTXLABEL("exposure")+"</b>, 수익은 <b>"+CTXLABEL("payPatience")+"</b>, 리스크는 <b>"+CTXLABEL("riskTolerance")+"</b>. 이 네 가지가 당신이 갈 수 있는 길과 갈 수 없는 길을 이미 절반 갈라놨습니다.");
   out.push("이키가이 네 칸 중 지금 가장 비어 있는 칸은 <b>"+IKIGAI[ikLow.k].ko+"</b>입니다. 당신의 다음 과제는 채워진 칸을 더 채우는 게 아니라 이 빈칸을 건드리는 쪽에 있습니다.");
@@ -1163,7 +1170,7 @@ function pathWhy(r, P){
 function ladder(top, P, target){
   const H = ["3개월","1년","3년","10년"][P.ctx.horizon];
   const items = [
-    ["가장 먼 곳", H+" 뒤에 <b>"+esc(target.name)+"</b>이(가) 자리를 잡으려면, 그때의 당신은 무엇을 반복해왔어야 할까요."],
+    ["가장 먼 곳", H+" 뒤에 <b>"+esc(target.name)+"</b>"+josa(target.name,"이","가")+" 자리를 잡으려면, 그때의 당신은 무엇을 반복해왔어야 할까요."],
     ["1년", "그 반복의 증거가 12개쯤 쌓여 있으려면, 한 달에 하나씩은 세상에 나와야 합니다. 완성도가 아니라 개수가 기준입니다."],
     ["이번 달", "그 증거 중 <b>첫 번째 하나</b>를 완성합니다. 남에게 보여줄 수 있는 형태여야 합니다. 내 서랍 속 초안은 증거가 아닙니다. 그리고 그 시간을 어디서 뺄지 먼저 정하세요 — 무엇을 <b>그만둘지</b> 정하지 않은 계획은 계획이 아니라 소원입니다."],
     ["이번 주", esc(target.exp2w)],
@@ -1255,7 +1262,13 @@ function hygieneSection(P){
   let verdict;
   if(a>=3) verdict = "당신의 위생요인은 <b>채워져 있습니다</b>. 그래서 여기를 더 채우려는 시도는 동기를 만들어내지 못합니다. 돈을 더 버는 계획이 이상하게 가슴을 안 뛰게 하는 건 당신의 문제가 아니라 그게 원래 그런 종류의 것이기 때문입니다. 당신의 만족은 오직 의미·성장·기여 쪽에서만 나옵니다. 이건 좋은 소식입니다 — 수익화를 목표가 아니라 <b>검증 지표</b>로 강등시켜도 된다는 뜻이니까요.";
   else if(a<=1.6) verdict = "위생요인이 <b>무너져 있습니다</b>. 이 상태에서 의미를 찾으려 하면 둘 다 실패합니다. 지금 당신의 첫 번째 과제는 원싱을 찾는 게 아니라 무너진 칸을 세우는 일입니다. 물러서는 게 아니라 공사 순서를 지키는 겁니다. 아래 결과는 그 칸이 세워진 다음에 유효합니다.";
-  else verdict = "위생요인이 <b>애매하게 걸쳐 있습니다</b>. 가장 낮은 칸 하나만 먼저 올려놓으세요. 완전히 무너진 것도 아니고 충분한 것도 아닌 이 구간이, 무엇을 해도 집중이 안 되는 가장 흔한 자리입니다.";
+  else {
+    const low = Object.keys(HYGIENE).sort((x,y)=> P.hyg.v[x] - P.hyg.v[y]).slice(0,2)
+                 .filter((k,i)=> i===0 || P.hyg.v[k] === P.hyg.v[Object.keys(HYGIENE).sort((x,y)=>P.hyg.v[x]-P.hyg.v[y])[0]]);
+    verdict = "위생요인이 <b>애매하게 걸쳐 있습니다</b>. 지금 가장 낮은 칸은 <b>"
+            + low.map(k=>HYGIENE[k].ko).join("·") + "</b>입니다. 이것부터 하나 올려놓으세요. "
+            + "완전히 무너진 것도 아니고 충분한 것도 아닌 이 구간이, 무엇을 해도 집중이 안 되는 가장 흔한 자리입니다.";
+  }
   h += '<p class="tiny" style="margin-top:14px">'+verdict+'</p></div>';
   return h;
 }
@@ -1287,7 +1300,10 @@ function modeSection(P){
   if(em){
     h += '<p style="font-size:15px">확신이 서지 않은 상태입니다. 이때 큰 계획을 세우는 건 사치입니다. 값싸고 빠른 시도를 여러 개 던져놓고, <b>세상이 반응하는 쪽</b>을 따라가야 합니다.</p>';
     h += '<p style="font-size:15px">혼다는 미국에 대형 오토바이를 팔러 갔다가 완전히 실패했습니다. 그런데 직원들이 타고 다니던 소형 슈퍼커브를 사람들이 어디서 살 수 있냐고 묻기 시작했고, 계획을 갈아엎고 그쪽으로 갔습니다. 계획이 아니라 <b>예상 못 한 반응</b>이 전략이 된 겁니다.</p>';
-    h += '<p style="font-size:15px;margin-bottom:0"><b>당신의 처방</b> — 아래 2주 실험을 하나에 걸지 마세요. 가설 1·2·3을 각각 가장 작은 형태로 동시에 던져놓고, 2주 뒤 <b>가장 예상 밖의 반응이 온 쪽</b>을 고르세요. 당신이 고르는 게 아니라 반응이 고르게 두는 겁니다.</p>';
+    const names = P.cands.length ? P.cands.slice(0,3).map(c=>"\u201c"+esc(c.t)+"\u201d").join(" · ")
+                                 : "가설 1·2·3";
+    h += '<p style="font-size:15px;margin-bottom:0"><b>당신의 처방</b> — 아래 2주 실험을 하나에 걸지 마세요. '
+       + names + ' 를 각각 가장 작은 형태로 동시에 던져놓고, 2주 뒤 <b>가장 예상 밖의 반응이 온 쪽</b>을 고르세요. 당신이 고르는 게 아니라 반응이 고르게 두는 겁니다.</p>';
   } else {
     h += '<p style="font-size:15px">할 일이 어느 정도 보이는 상태입니다. 이때는 흩어놓는 게 손해입니다. 자원을 하나에 몰아넣어야 합니다.</p>';
     h += '<p style="font-size:15px;margin-bottom:0"><b>당신의 처방</b> — 가설 1번 하나에만 2주를 전부 거세요. 나머지 둘은 적어놓고 손대지 마세요. 그리고 이 확신이 진짜인지 확인하는 질문 하나 — 이 가설이 성립하려면 <b>무엇이 참이어야 하는가?</b> 그 전제 중 가장 의심스러운 것부터 2주 안에 검증하세요.</p>';
@@ -1318,7 +1334,7 @@ function poisons(P){
   return fired.map(r=>'<div class="warnbox"><h3>'+r.h+'</h3><p>'+r.b+'</p></div>').join("");
 }
 
-function contentDraft(top, P){
+function contentDraft(top, P, target){
   const t = topEntries(P.th, v=>v.norm, 2).map(x=>THEMES[x.k].ko);
   const m = topEntries(P.mot, v=>v, 1)[0];
   const ikLow = topEntries(P.ik, v=>-v, 1)[0];
@@ -1350,8 +1366,12 @@ function contentDraft(top, P){
 " 전략은 말이 아니라 자원이 가는 곳이다.",
 "",
 "## 그래서 세운 가설",
-"**"+top.p.name+"** — "+top.p.one,
-"사람들은 이 길의 나를 \u201c"+top.p.job+"\u201d는 일을 시키려고 부른다.",
+(P.cands.length
+  ? "**" + target.name + "** — 내가 적은 " + P.cands.length + "개 중에서 골랐다."
+  : "**" + top.p.name + "** — " + top.p.one),
+(P.cands.length
+  ? "밀면 나머지가 같이 넘어갈 것 같아서 이걸 먼저 하기로 했다."
+  : "사람들은 이 길의 나를 \u201c" + top.p.job + "\u201d는 일을 시키려고 부른다."),
 "",
 "정답이라고 생각하지 않는다. 가설이다. 그래서 검증한다.",
 (P.strat.mode==="emergent"
@@ -1359,7 +1379,7 @@ function contentDraft(top, P){
   : "확신이 어느 정도 있으니 이번엔 하나에 몰아넣는다."),
 "",
 "## 앞으로 2주 동안 할 것",
-top.p.exp2w,
+target.exp2w,
 "",
 "성공 기준은 두 개다.",
 "1. 끝나고 나에게 기운이 남아 있는가",
@@ -1466,7 +1486,7 @@ function renderResult(){
 
   h += '<section class="rsec"><h2>당신에게는 독이 될 조언</h2><p class="sub">좋은 조언이어서 더 위험합니다. 다른 맥락에서는 맞는 말이기 때문입니다.</p>'+poisons(P)+'</section>';
 
-  const md = contentDraft(top3[0],P);
+  const md = contentDraft(top3[0],P,target);
   h += '<section class="rsec"><h2>이 과정을 콘텐츠로</h2><p class="sub">찾은 다음에 기록하는 게 아니라, 찾는 과정을 기록하는 겁니다. 헤매는 기록이 정리된 결론보다 훨씬 잘 읽힙니다.</p>';
   h += '<pre class="copyme" id="mdBox">'+esc(md)+'</pre>';
   h += '<div class="row"><button class="btn" id="copyMd" type="button">초안 복사</button><button class="btn sec" id="copyAll" type="button">결과 전체 복사</button></div></section>';
