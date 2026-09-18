@@ -531,122 +531,122 @@ const CTX = [
 ];
 
 const PATHS = [
-  {id:"tool", name:"도구를 만드는 사람", one:"쓰는 사람의 불편을 소프트웨어로 없앤다", job:"이 반복 작업 좀 없애줘",
+  {id:"tool", name:"도구를 만드는 사람", one:"쓰는 사람의 불편을 소프트웨어로 없앤다", job:"이 반복 작업 좀 없애줘", bridge:"쓰는 사람이 매번 반복하는 손일을 하나 찾아, 그것만 없애주는 형태로 좁히세요.",
    t:{make:3,structure:2,improve:2,analyze:1}, m:{create:3,autonomy:2,mastery:2,impact:1},
    need:{exp:0,time:2,lag:2,risk:0}, fills:["love","paid"],
    exp2w:"당신이 이미 겪은 불편 하나를 골라, 화면 3개짜리로 가장 작게 만들어 실제 사용자 3명에게 쥐여주고 일주일 쓰게 한다.",
    content:"기능 하나를 붙이고 떼는 판단 과정을 그대로 공개한다. 완성품보다 '왜 이건 버렸는지'가 읽힌다."},
-  {id:"nicheB2B", name:"한 직군만 파는 사람", one:"좁은 직군의 업무를 통째로 이해하고 그들만의 도구를 만든다", job:"우리 일을 진짜 아는 사람이 만든 걸 쓰고 싶다",
+  {id:"nicheB2B", name:"한 직군만 파는 사람", one:"좁은 직군의 업무를 통째로 이해하고 그들만의 도구를 만든다", job:"우리 일을 진짜 아는 사람이 만든 걸 쓰고 싶다", bridge:"모두를 위한 것으로 만들지 말고, 한 직군만 정해서 그들이 쓰는 말로 만드세요.",
    t:{make:3,analyze:2,structure:2,connect:1}, m:{create:3,impact:2,autonomy:2},
    need:{exp:1,time:2,lag:1,risk:1}, fills:["paid","world"],
    exp2w:"같은 직군 5명에게 30분씩 업무 흐름을 듣고, 다섯 명이 공통으로 반복하는 수작업 하나를 찾아 그것만 자동화해 준다.",
    content:"인터뷰에서 들은 말 중 나를 놀라게 한 문장들을 기록한다. 현장의 말이 곧 콘텐츠다."},
-  {id:"teachCourse", name:"가르치는 사람", one:"내가 건넌 다리를 뒤에 오는 사람이 건너게 한다", job:"이거 나도 할 수 있게 해줘",
+  {id:"teachCourse", name:"가르치는 사람", one:"내가 건넌 다리를 뒤에 오는 사람이 건너게 한다", job:"이거 나도 할 수 있게 해줘", bridge:"혼자 알고 있는 순서를 남이 그대로 따라 할 수 있는 단계로 쪼개서 내놓으세요.",
    t:{teach:3,structure:2,persuade:1,care:1}, m:{impact:3,mastery:2,recognition:1},
    need:{exp:2,time:2,lag:1,risk:2}, fills:["paid","world"],
    exp2w:"당신이 아는 것 중 가장 좁은 주제 하나로 90분 분량을 만들어, 아는 사람 5명에게 무료로 해보고 끝나고 뭐가 남았는지 묻는다.",
    content:"커리큘럼을 짜면서 '이건 뺐다'고 결정한 것들을 공개한다. 빼는 기준이 곧 전문성이다."},
-  {id:"writer", name:"쓰는 사람", one:"한 사람의 머릿속을 문장으로 바꿔놓는다", job:"생각이 정리가 안 돼, 말이 되게 만들어줘",
+  {id:"writer", name:"쓰는 사람", one:"한 사람의 머릿속을 문장으로 바꿔놓는다", job:"생각이 정리가 안 돼, 말이 되게 만들어줘", bridge:"결론부터 쓰고, 읽은 사람이 오늘 바로 써먹을 수 있는 형태로 남기세요.",
    t:{persuade:2,teach:2,structure:2,explore:2}, m:{impact:2,create:2,mastery:2,autonomy:2},
    need:{exp:1,time:1,lag:3,risk:1}, fills:["love","world"],
    exp2w:"한 가지 주제로 열흘간 매일 한 편씩 쓰고, 열 편 중 반응이 온 두 편이 무엇이 달랐는지 분석한다.",
    content:"글을 쓰는 과정 자체가 이미 콘텐츠다. 반응이 없던 글도 같이 올리고 왜 안 됐는지 쓴다."},
-  {id:"speaker", name:"말하는 사람", one:"목소리와 얼굴로 사람의 관점을 흔든다", job:"내 생각을 좀 흔들어줘",
+  {id:"speaker", name:"말하는 사람", one:"목소리와 얼굴로 사람의 관점을 흔든다", job:"내 생각을 좀 흔들어줘", bridge:"글로 정리하기 전에 말로 먼저 해보고, 그 말투를 그대로 남기세요.",
    t:{persuade:3,teach:2,aesthetic:1}, m:{impact:3,recognition:2,create:1},
    need:{exp:3,time:2,lag:2,risk:3}, fills:["world","paid"],
    exp2w:"3분짜리 영상 10개를 2주 안에 올리고, 조회수가 아니라 댓글의 '내용'이 어떻게 달라지는지만 본다.",
    content:"카메라 앞에서 망한 테이크를 남겨둔다. 완성된 말보다 더듬는 과정이 사람을 붙잡는다."},
-  {id:"coach", name:"곁에서 돕는 사람", one:"한 사람을 붙잡고 끝까지 같이 간다", job:"혼자서는 안 되니까 옆에 있어줘",
+  {id:"coach", name:"곁에서 돕는 사람", one:"한 사람을 붙잡고 끝까지 같이 간다", job:"혼자서는 안 되니까 옆에 있어줘", bridge:"여러 명에게 조금씩 말고, 한 사람을 끝까지 붙잡는 형태로 좁히세요.",
    t:{care:3,teach:2,connect:1}, m:{impact:3,belong:2,mastery:1},
    need:{exp:2,time:2,lag:0,risk:2}, fills:["paid","world"],
    exp2w:"세 사람을 골라 2주간 무료로 밀착해서 돕고, 끝나고 '무엇이 가장 도움이 됐냐'를 각자에게 직접 묻는다.",
    content:"한 사람이 바뀌는 2주를 동의받고 기록한다. 통계보다 한 사람의 변화가 훨씬 세다."},
-  {id:"community", name:"판을 여는 사람", one:"흩어진 사람들이 모일 자리를 만든다", job:"나 같은 사람이 또 있다는 걸 확인하고 싶다",
+  {id:"community", name:"판을 여는 사람", one:"흩어진 사람들이 모일 자리를 만든다", job:"나 같은 사람이 또 있다는 걸 확인하고 싶다", bridge:"혼자 내놓지 말고, 같은 처지인 몇 명을 불러 함께 굴러가게 만드세요.",
    t:{connect:3,care:2,execute:1}, m:{belong:3,impact:2,create:1},
    need:{exp:2,time:3,lag:2,risk:2}, fills:["world","love"],
    exp2w:"같은 고민을 가진 10명을 모아 2주간 굴러가게 해보고, 내가 손을 떼면 대화가 끊기는지 아닌지를 본다.",
    content:"사람이 모이고 흩어지는 이유를 관찰해서 쓴다. 커뮤니티 운영기는 수요가 크다."},
-  {id:"curator", name:"골라내는 사람", one:"넘치는 것들 사이에서 쓸 것만 남긴다", job:"뭘 봐야 할지 골라줘",
+  {id:"curator", name:"골라내는 사람", one:"넘치는 것들 사이에서 쓸 것만 남긴다", job:"뭘 봐야 할지 골라줘", bridge:"직접 다 만들려 하지 말고, 좋은 걸 골라내고 왜 골랐는지를 붙이세요.",
    t:{structure:3,explore:2,aesthetic:1}, m:{mastery:2,autonomy:2,impact:1,create:1},
    need:{exp:0,time:1,lag:3,risk:0}, fills:["world","love"],
    exp2w:"한 주제로 2주간 매일 하나씩 골라 '왜 이걸 남겼는지'를 세 줄씩 붙여 쌓는다.",
    content:"선택 기준 자체를 공개한다. 큐레이션의 값어치는 목록이 아니라 기준에 있다."},
-  {id:"researcher", name:"파고드는 사람", one:"남들이 대충 넘긴 곳을 끝까지 판다", job:"이거 진짜인지 아닌지 알려줘",
+  {id:"researcher", name:"파고드는 사람", one:"남들이 대충 넘긴 곳을 끝까지 판다", job:"이거 진짜인지 아닌지 알려줘", bridge:"느낌으로 말하지 말고, 하나를 끝까지 파서 근거를 들고 나오세요.",
    t:{explore:3,analyze:3,structure:2}, m:{mastery:3,impact:1,create:1},
    need:{exp:0,time:2,lag:3,risk:0}, fills:["good","world"],
    exp2w:"모두가 사실이라 믿는 통념 하나를 골라 2주간 원자료까지 추적해, 맞는지 틀린지 결론을 낸다.",
    content:"추적 과정을 날짜별로 남긴다. 결론보다 '뒤집히는 순간'이 읽힌다."},
-  {id:"broker", name:"잇는 사람", one:"서로를 몰라서 못 만나던 둘을 붙인다", job:"나한테 맞는 사람 좀 연결해줘",
+  {id:"broker", name:"잇는 사람", one:"서로를 몰라서 못 만나던 둘을 붙인다", job:"나한테 맞는 사람 좀 연결해줘", bridge:"당신이 다 하려 하지 말고, 서로 필요한 두 사람을 붙여주는 자리로 옮기세요.",
    t:{connect:3,execute:2,persuade:2}, m:{impact:2,belong:2,recognition:1},
    need:{exp:2,time:2,lag:1,risk:2}, fills:["paid","world"],
    exp2w:"2주 동안 의도적으로 열 쌍을 소개해 보고, 실제로 뭔가가 성사된 경우의 공통점을 찾는다.",
    content:"연결이 성사되는 조건을 사례로 정리한다."},
-  {id:"insider", name:"안에서 고치는 사람", one:"지금 있는 조직의 일하는 방식을 바꾼다", job:"이 일을 덜 짜증나게 만들어줘",
+  {id:"insider", name:"안에서 고치는 사람", one:"지금 있는 조직의 일하는 방식을 바꾼다", job:"이 일을 덜 짜증나게 만들어줘", bridge:"밖에서 새로 시작하지 말고, 지금 속한 곳 안에서 먼저 굴려보세요.",
    t:{improve:3,structure:3,execute:2,analyze:1}, m:{mastery:2,impact:2,belong:1},
    need:{exp:0,time:1,lag:0,risk:0}, fills:["good","paid"],
    exp2w:"팀에서 가장 자주 반복되는 낭비 하나를 찾아 2주 안에 없애고, 아낀 시간을 숫자로 남긴다.",
    content:"조직 안에서 바꾼 것들을 익명화해서 기록한다. 겸직 리스크 없이 쌓이는 자산이다."},
-  {id:"maker", name:"손으로 만드는 사람", one:"만질 수 있는 것을 세상에 내놓는다", job:"이런 걸 파는 데가 없다, 만들어줘",
+  {id:"maker", name:"손으로 만드는 사람", one:"만질 수 있는 것을 세상에 내놓는다", job:"이런 걸 파는 데가 없다, 만들어줘", bridge:"화면 속에만 두지 말고, 손에 잡히는 형태로 하나 만들어보세요.",
    t:{make:3,aesthetic:3,execute:2}, m:{create:3,mastery:2,autonomy:1},
    need:{exp:1,time:3,lag:2,risk:1}, fills:["love","paid"],
    exp2w:"2주 안에 완성품 세 개를 만들어 실제로 한 개를 판다. 팔리는지보다 '팔 때의 내 감정'을 본다.",
    content:"만드는 손을 찍는다. 과정 영상은 결과 사진보다 오래 본다."},
-  {id:"archivist", name:"기록하는 사람", one:"사라질 것들을 남겨서 찾을 수 있게 만든다", job:"그게 어디 있는지 찾게 해줘",
+  {id:"archivist", name:"기록하는 사람", one:"사라질 것들을 남겨서 찾을 수 있게 만든다", job:"그게 어디 있는지 찾게 해줘", bridge:"한 번 쓰고 버리지 말고, 나중에 찾아 쓸 수 있게 쌓아두세요.",
    t:{structure:3,execute:2,explore:2}, m:{mastery:2,autonomy:2,create:1},
    need:{exp:0,time:2,lag:3,risk:0}, fills:["world","good"],
    exp2w:"흩어져 있는 어떤 정보를 2주간 한곳에 모아 검색 가능하게 만들고, 세 명이 실제로 찾아 쓰는지 본다.",
    content:"모으는 기준과 버리는 기준을 공개한다."},
-  {id:"templater", name:"틀을 파는 사람", one:"내가 만든 틀을 남이 쓰게 한다", job:"처음부터 만들긴 싫어, 틀을 줘",
+  {id:"templater", name:"틀을 파는 사람", one:"내가 만든 틀을 남이 쓰게 한다", job:"처음부터 만들긴 싫어, 틀을 줘", bridge:"매번 새로 하지 말고, 남이 그대로 갖다 쓸 수 있는 틀로 만드세요.",
    t:{structure:2,make:2,improve:2,aesthetic:2}, m:{autonomy:3,create:2,mastery:1},
    need:{exp:0,time:1,lag:1,risk:0}, fills:["paid","good"],
    exp2w:"내가 반복해서 쓰던 양식·시트·프롬프트 하나를 남이 바로 쓸 수 있게 다듬어 2주 안에 배포한다.",
    content:"틀을 만들게 된 원래의 불편을 이야기로 붙인다."},
-  {id:"diagnostician", name:"진단을 설계하는 사람", one:"사람이 자기를 알아보게 하는 도구를 만든다", job:"내가 어떤 사람인지 알고 싶다",
+  {id:"diagnostician", name:"진단을 설계하는 사람", one:"사람이 자기를 알아보게 하는 도구를 만든다", job:"내가 어떤 사람인지 알고 싶다", bridge:"답을 주려 하지 말고, 상대가 스스로를 알아보게 하는 질문으로 바꾸세요.",
    t:{structure:3,teach:2,make:2,analyze:2}, m:{impact:3,create:2,mastery:2},
    need:{exp:0,time:2,lag:2,risk:0}, fills:["love","world"],
    exp2w:"당신이 사람들에게 자주 하던 질문 7개를 뽑아 한 장짜리 진단지로 만들고, 10명에게 답하게 한 뒤 결과가 맞는지 본인에게 확인받는다.",
    content:"진단 로직을 왜 이렇게 짰는지 공개한다. 설계 근거가 신뢰를 만든다."},
-  {id:"host", name:"자리를 여는 사람", one:"사람들이 얼굴 보고 만나는 자리를 연다", job:"사람을 만나고 싶은데 자리가 없다",
+  {id:"host", name:"자리를 여는 사람", one:"사람들이 얼굴 보고 만나는 자리를 연다", job:"사람을 만나고 싶은데 자리가 없다", bridge:"온라인으로만 하지 말고, 사람들이 얼굴 보고 만나는 자리를 한 번 여세요.",
    t:{connect:3,execute:2,care:2}, m:{belong:3,impact:2},
    need:{exp:3,time:2,lag:1,risk:2}, fills:["world","love"],
    exp2w:"2주 안에 8명 규모 모임을 한 번 열고, 끝나고 각자에게 '또 올 건가'를 묻는다.",
    content:"모임을 설계하고 망치고 고친 기록을 남긴다."},
-  {id:"local", name:"동네에서 하는 사람", one:"손에 닿는 반경 안의 사람들을 상대한다", job:"가까운 데서 해결하고 싶다",
+  {id:"local", name:"동네에서 하는 사람", one:"손에 닿는 반경 안의 사람들을 상대한다", job:"가까운 데서 해결하고 싶다", bridge:"멀리 보지 말고, 걸어갈 수 있는 거리 안의 사람부터 상대하세요.",
    t:{execute:3,care:2,connect:2,aesthetic:1}, m:{autonomy:2,belong:2,impact:1},
    need:{exp:2,time:3,lag:2,risk:3}, fills:["paid","world"],
    exp2w:"가장 작게 시작할 수 있는 형태로 2주간 열어보고, 다시 온 사람이 몇 명인지만 센다.",
    content:"동네 장사의 숫자를 정직하게 공개한다. 희소하고 잘 읽힌다."},
-  {id:"editor", name:"남의 것을 낫게 하는 사람", one:"이미 있는 것을 다듬어 완성시킨다", job:"내 것 좀 봐주고 낫게 만들어줘",
+  {id:"editor", name:"남의 것을 낫게 하는 사람", one:"이미 있는 것을 다듬어 완성시킨다", job:"내 것 좀 봐주고 낫게 만들어줘", bridge:"처음부터 만들지 말고, 이미 있는 걸 더 낫게 고치는 자리에 서세요.",
    t:{improve:3,aesthetic:2,structure:2,teach:1}, m:{mastery:2,impact:2,create:1},
    need:{exp:1,time:2,lag:1,risk:1}, fills:["paid","good"],
    exp2w:"남의 결과물 세 개를 무료로 고쳐주고, 고치기 전과 후의 차이를 나란히 남긴다.",
    content:"전후 비교가 곧 포트폴리오이자 콘텐츠다."},
-  {id:"trainer", name:"몸을 바꾸는 사람", one:"사람의 몸과 습관을 직접 바꾼다", job:"내 몸을 바꿔줘, 혼자서는 못 하겠다",
+  {id:"trainer", name:"몸을 바꾸는 사람", one:"사람의 몸과 습관을 직접 바꾼다", job:"내 몸을 바꿔줘, 혼자서는 못 하겠다", bridge:"말로만 알려주지 말고, 상대의 몸이 실제로 달라지는 데까지 따라가세요.",
    t:{care:3,teach:2,execute:2,analyze:1}, m:{impact:3,mastery:2,belong:1},
    need:{exp:2,time:3,lag:0,risk:3}, fills:["paid","world"],
    exp2w:"세 사람의 2주 변화를 숫자와 사진으로 기록하고, 무엇이 실제로 작동했는지 가려낸다.",
    content:"한 사람의 2주를 끝까지 따라간 기록. 변화의 서사는 늘 통한다."},
-  {id:"mentor", name:"사수가 되는 사람", one:"가까운 사람을 제대로 키운다", job:"제대로 배울 사수가 없다",
+  {id:"mentor", name:"사수가 되는 사람", one:"가까운 사람을 제대로 키운다", job:"제대로 배울 사수가 없다", bridge:"불특정 다수 말고, 이름을 아는 한 사람에게 하듯이 하세요. 대상을 한 명으로 좁히면 나머지가 저절로 정해집니다.",
    t:{teach:3,care:2,structure:1}, m:{impact:3,belong:2,recognition:1},
    need:{exp:1,time:1,lag:0,risk:0}, fills:["world","good"],
    exp2w:"한 사람을 정해 2주간 매주 한 시간씩 붙어서 가르치고, 그 사람이 혼자 해내는 순간까지 간다.",
    content:"가르치며 내가 다시 배운 것을 쓴다."},
-  {id:"ghost", name:"얼굴 없이 만드는 사람", one:"이름을 걸지 않고 결과물만 내보낸다", job:"이걸 대신 만들어줄 사람이 필요하다",
+  {id:"ghost", name:"얼굴 없이 만드는 사람", one:"이름을 걸지 않고 결과물만 내보낸다", job:"이걸 대신 만들어줄 사람이 필요하다", bridge:"이름을 앞세우지 말고, 결과물만 먼저 내보내세요.",
    t:{make:2,teach:2,persuade:2,structure:1,aesthetic:1}, m:{create:3,autonomy:3,impact:1},
    need:{exp:0,time:2,lag:2,risk:0}, fills:["love","paid"],
    exp2w:"익명 계정이나 필명으로 2주간 결과물만 내보내고, 내 이름 없이도 만족감이 유지되는지 확인한다.",
    content:"익명으로도 쌓인다. 만드는 과정만 보여주고 얼굴은 끝까지 안 보여줘도 된다."},
-  {id:"pioneer", name:"먼저 여는 사람", one:"아직 이름이 없는 영역에 처음 깃발을 꽂는다", job:"이런 게 있으면 좋겠는데 아직 아무도 안 만들었다",
+  {id:"pioneer", name:"먼저 여는 사람", one:"아직 이름이 없는 영역에 처음 깃발을 꽂는다", job:"이런 게 있으면 좋겠는데 아직 아무도 안 만들었다", bridge:"남들 하는 방식을 따르지 말고, 아직 아무도 안 해본 각도로 하나만 틀어보세요.",
    t:{pioneer:3,make:2,persuade:2,explore:2}, m:{create:3,autonomy:2,recognition:2,impact:1},
    need:{exp:2,time:3,lag:3,risk:3}, fills:["love","world"],
    exp2w:"아무도 안 하는 그 일을 2주간 그냥 해버리고, 사람들이 뭐라고 부르는지 관찰한다.",
    content:"이름 없는 것에 이름을 붙이는 과정 자체가 최고의 콘텐츠다."},
-  {id:"planner", name:"설계하는 사람", one:"무엇을 만들지를 정하는 자리에 선다", job:"뭘 만들어야 할지 정해줘",
+  {id:"planner", name:"설계하는 사람", one:"무엇을 만들지를 정하는 자리에 선다", job:"뭘 만들어야 할지 정해줘", bridge:"만들기 전에 무엇을 만들지부터 근거를 대서 정하세요.",
    t:{structure:3,analyze:2,improve:2,connect:1}, m:{create:2,mastery:2,impact:2},
    need:{exp:1,time:2,lag:1,risk:1}, fills:["good","paid"],
    exp2w:"당신이 쓰는 서비스 하나를 골라 2주간 뜯어보고, 다음에 뭘 만들어야 하는지 근거와 함께 제안서로 만든다.",
    content:"뜯어보기 시리즈는 전문성을 가장 빠르게 증명한다."},
-  {id:"translator", name:"다리를 놓는 사람", one:"한쪽 세계의 말을 다른 쪽이 알아듣게 옮긴다", job:"이 말을 알아듣게 옮겨줘",
+  {id:"translator", name:"다리를 놓는 사람", one:"한쪽 세계의 말을 다른 쪽이 알아듣게 옮긴다", job:"이 말을 알아듣게 옮겨줘", bridge:"당신 세계의 말로 하지 말고, 못 알아듣는 쪽 사람이 쓰는 말로 옮기세요.",
    t:{teach:2,structure:2,explore:2,improve:1}, m:{mastery:2,autonomy:2,impact:1},
    need:{exp:0,time:1,lag:1,risk:0}, fills:["world","paid"],
    exp2w:"전문 영역의 자료 하나를 골라 2주간 완전히 다른 집단이 알아듣게 옮기고, 실제로 이해했는지 확인한다.",
@@ -1255,6 +1255,31 @@ function candSection(P){
   return h;
 }
 
+/* 사용자가 적은 것과 계산이 뽑은 길은 지금까지 나란히 놓여 있기만 했다.
+   둘을 만나게 하는 게 이 도구만 줄 수 있는 답이다. */
+function bridgeSection(P){
+  const C = P.cands[0], r = P.ranked[0];
+  if(!C) return "";
+  const p = r.p;
+  const pTop = Object.keys(p.t).sort((a,b)=> p.t[b] - p.t[a])[0];
+  const same = C.theme && C.theme === pTop;
+  let h = '<div class="card">';
+  if(same){
+    h += '<p style="font-size:15px">당신이 적은 <b>\u201c' + esc(C.t) + '\u201d</b>와 계산이 뽑은 <b>' + esc(p.name)
+       + '</b>은 <b>이미 같은 방향</b>을 보고 있습니다. 둘 다 ' + THEMES[pTop].ko + '을(를) 요구하거든요. 드문 경우이고, 좋은 신호입니다.</p>';
+  } else {
+    h += '<p style="font-size:15px">당신이 적은 <b>\u201c' + esc(C.t) + '\u201d</b>와 계산이 뽑은 <b>' + esc(p.name)
+       + '</b>은 서로 다른 것처럼 보입니다. 그런데 사람들이 이 길의 당신을 부르는 이유는 <b>\u201c' + esc(p.job)
+       + '\u201d</b>는 일 때문입니다.</p>';
+  }
+  h += '<div class="quoteback" style="margin:14px 0"><b>합치는 법</b><br>' + esc(p.bridge) + '</div>';
+  h += '<p style="font-size:15px;margin:0">그렇게 하면 <b>\u201c' + esc(C.t) + '\u201d</b>는 흔한 것 하나가 아니라, '
+     + '당신만 할 수 있는 형태가 됩니다. 2주 실험도 이 각도로 잡으세요.</p>';
+  h += '<p class="tiny" style="margin-top:12px">이건 계산이 아니라 <b>제안</b>입니다. 읽고 \u201c아 그러면 되겠네\u201d 싶으면 쓰고, 억지스러우면 그냥 버리세요. 당신이 적은 것이 우선입니다.</p>';
+  h += '</div>';
+  return h;
+}
+
 function hygieneSection(P){
   let h = '<div class="card">';
   Object.keys(HYGIENE).forEach(k=> h += bar(HYGIENE[k].ko, P.hyg.v[k]/4*100, false));
@@ -1477,6 +1502,10 @@ function renderResult(){
   });
   const worst = P.ranked[P.ranked.length-1];
   h += '<p class="tiny" style="margin-top:16px">참고로 24개 길 중 지금 당신에게 가장 안 맞는 건 <b style="color:var(--ink)">'+esc(worst.p.name)+'</b>('+Math.round(worst.fit*100)+'점)입니다. 재능이 없어서가 아니라 지금 맥락과 어긋나기 때문입니다. 맥락이 바뀌면 이 순위도 바뀝니다.</p></section>';
+
+  if(P.cands.length && P.ranked.length)
+    h += '<section class="rsec"><h2>둘을 합치면</h2><p class="sub">당신이 적은 것과 계산이 뽑은 길이 따로 놀고 있습니다. 붙일 수 있는 자리를 하나 제안합니다.</p>'
+       + bridgeSection(P) + '</section>';
 
   h += '<section class="rsec"><h2>몰아넣을 때인가, 흩뿌릴 때인가</h2><p class="sub">확신이 있을 땐 자원을 집중하는 게 맞고, 확신이 없을 땐 값싼 시도를 여러 개 던지는 게 맞습니다. 순서를 바꾸면 둘 다 실패합니다.</p>'+modeSection(P)+'</section>';
 
