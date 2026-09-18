@@ -485,10 +485,14 @@ const IKIGAI = {
 /* 허즈버그 — 위생요인은 부족하면 불만을 낳지만, 채워도 만족을 낳지 않는다.
    동기요인(의미·성장·기여)만이 만족을 만든다. 둘을 섞으면 평생 헛다리를 짚는다. */
 const HYGIENE = {
-  income:    {ko:"수입",      q:"지금 버는 돈이 내 생활을 꾸리기에 부족하지 않다."},
-  stability: {ko:"안정",      q:"내 자리가 흔들릴 걱정이 지금 크지는 않다."},
-  status:    {ko:"지위·대우", q:"내가 속한 곳에서 내 역할과 대우가 부당하지 않다."},
-  condition: {ko:"환경·관계", q:"일하는 환경과 사람 관계가 나를 갉아먹고 있지는 않다."}
+  income:    {ko:"수입",      q:"지금 수입은 어떤가요?",
+              o:["많이 부족하다","빠듯하다","그럭저럭 된다","넉넉하다"]},
+  stability: {ko:"자리",      q:"지금 자리는 어떤가요?",
+              o:["곧 흔들릴 것 같다","좀 불안하다","그런대로 안정적","아주 안정적"]},
+  status:    {ko:"대우",      q:"지금 받는 대우는 어떤가요?",
+              o:["많이 부당하다","좀 아쉽다","괜찮은 편","만족스럽다"]},
+  condition: {ko:"환경·관계", q:"일하는 환경과 사람 관계는 어떤가요?",
+              o:["매일 갉아먹힌다","가끔 힘들다","견딜 만하다","좋은 편이다"]}
 };
 
 /* 전략은 말이 아니라 자원이 가는 곳이다 — 선언한 우선순위와 실제 배분의 괴리를 잰다 */
@@ -913,8 +917,14 @@ function buildHygiene(){
   Object.entries(HYGIENE).forEach(([k,v])=>{
     const q=el("div","q");
     q.appendChild(el("div","qh","<span style='color:var(--accent);font-size:13px;font-weight:700'>"+v.ko+"</span><br>"+esc(v.q)));
-    q.appendChild(scaleRow(AGREE, ()=>S.hyg[k], i=>S.hyg[k]=i));
-    box.appendChild(q);
+    const row=el("div","opts");
+    v.o.forEach((lb,i)=>{
+      const b=el("button","opt",esc(lb)); b.type="button";
+      b.onclick=()=>{ S.hyg[k]=i; [...row.children].forEach((x,j)=>x.classList.toggle("on",j===i)); save(true); };
+      if(S.hyg[k]===i) b.classList.add("on");
+      row.appendChild(b);
+    });
+    q.appendChild(row); box.appendChild(q);
   });
 }
 function multiPick(boxSel, arrName, max){
@@ -1032,7 +1042,10 @@ function topEntries(obj, valFn, n){
 
 function computeHygiene(){
   const out={}; let sum=0;
-  Object.keys(HYGIENE).forEach(k=>{ const v=(S.hyg[k]==null?2:S.hyg[k]); out[k]=v; sum+=v; });
+  Object.keys(HYGIENE).forEach(k=>{
+    const v=(S.hyg[k]==null ? 1.5 : S.hyg[k]) * (4/3);   // 0~3 입력을 0~4로 환산
+    out[k]=v; sum+=v;
+  });
   return {v:out, avg: sum/Object.keys(HYGIENE).length};
 }
 /* 선언한 우선순위 중 실제 배분에서 빠진 것 = 당신의 전략이 새는 자리 */
@@ -1069,11 +1082,34 @@ function scoreCands(th){
     .sort((a,b)=> b.fit - a.fit);
 }
 
+/* 막지 않는 대신 정직하게 보여준다. 덜 채운 건 벌줄 일이 아니라 알려줄 일이다. */
+function completeness(){
+  const candsFilled = S.cands.filter(c=>(c.t||"").trim().length>1);
+  let focusDone = 0;
+  candsFilled.forEach(c=> c.d.forEach(v=>{ if(v!=null) focusDone++; }));
+  const steps = [
+    {n:1, label:"지금 붙잡고 있는 것", total:4,
+     done: Math.min(candsFilled.length,1) + Math.min(focusDone,3)},
+    {n:2, label:"잘하는 것", total:12,
+     done: Object.values(S.sign).filter(o=>o.y!=null).length},
+    {n:3, label:"기운 나는 것", total:10,
+     done: Object.values(S.mot).filter(v=>v!=null).length
+         + Object.values(S.hyg).filter(v=>v!=null).length},
+    {n:4, label:"이키가이", total:4, done: Object.values(S.ik).filter(v=>v!=null).length},
+    {n:5, label:"진짜 전략", total:4,
+     done: (S.allocSay.length?1:0) + (S.allocDid.length?1:0)
+         + Object.values(S.strat).filter(v=>v!=null).length},
+    {n:6, label:"지금 형편", total:6, done: Object.values(S.ctx).filter(v=>v!=null).length}
+  ];
+  const done = steps.reduce((a,x)=>a+x.done,0), total = steps.reduce((a,x)=>a+x.total,0);
+  return {pct: Math.round(done/total*100), steps, done, total};
+}
+
 function profile(){
   const th=computeThemes(), mot=computeMotives(), ik=computeIkigai(), ctx=computeCtx();
   const hyg=computeHygiene(), alloc=computeAlloc(), strat=computeStrategy();
   return {th, mot, ik, ctx, hyg, alloc, strat,
-          cands: scoreCands(th), ranked: scorePaths(th,mot,ik,ctx)};
+          cands: scoreCands(th), ranked: scorePaths(th,mot,ik,ctx), comp: completeness()};
 }
 </script>
 
@@ -1149,6 +1185,27 @@ function experiment(top, P, target){
     '<li><b>두 번째 기준</b> 단 한 사람이라도 “이거 나한테 필요하다”고 말했는가. 칭찬은 신호가 아닙니다. 요청이 신호입니다.</li>'+
     '<li><b>기록</b> 매일 세 줄 — 오늘 한 것 / 막힌 것 / 지금 기분. 이 기록이 그대로 다음 항목의 재료가 됩니다.</li>'+
     '<li><b>예외 없음</b> \u201c이번 한 번만\u201d은 없습니다. 2주 동안 한 번 예외를 허용하면 그 다음부터 기준이 사라집니다. 100%를 지키는 게 98%를 지키는 것보다 오히려 쉽습니다. 한계비용이 싸 보이는 그 한 번이 전체 비용입니다.</li></ul></div>';
+}
+
+function compSection(P){
+  const c = P.comp;
+  const gaps = c.steps.filter(x=> x.done < x.total);
+  let h = '<div class="card" style="margin-top:0">';
+  h += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
+     + '<b style="font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--accent)" class="mono">'+c.pct+'%</b>'
+     + '<span style="font-size:15px;color:var(--ink-2)">채워진 답으로 만든 결과입니다</span></div>';
+  h += '<div class="track" style="height:7px;margin:12px 0 0;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;overflow:hidden">'
+     + '<div class="fill" data-w="'+c.pct+'" style="height:100%;background:var(--accent);border-radius:999px;width:0"></div></div>';
+  if(gaps.length){
+    h += '<p class="tiny" style="margin:14px 0 8px">덜 채운 곳입니다. 눌러서 바로 갈 수 있고, 채우면 결과가 그만큼 정확해집니다.</p>';
+    h += '<div class="row" style="margin-top:0">' + gaps.map(g=>
+      '<button class="btn sec" data-go="'+g.n+'" type="button" style="padding:8px 13px;font-size:13.5px">'
+      + esc(g.label) + ' <span class="mono" style="color:var(--ink-3)">'+g.done+'/'+g.total+'</span></button>').join("") + '</div>';
+  } else {
+    h += '<p class="tiny" style="margin-top:12px">빠짐없이 답하셨습니다. 이 결과는 제가 낼 수 있는 가장 정확한 형태입니다.</p>';
+  }
+  h += '</div>';
+  return h;
 }
 
 function candWhy(c, i, P){
@@ -1336,7 +1393,17 @@ function renderResult(){
                    : {name: top3[0].p.name, exp2w: top3[0].p.exp2w};
 
   let h = "";
-  h += '<div class="hero" style="padding-top:44px">';
+  if(P.comp.pct < 30){
+    h += '<div class="hero" style="padding-top:44px">';
+    h += '<span class="kicker">아직 결과라고 부를 수 없습니다</span>';
+    h += '<h1>답이 너무 적습니다</h1>';
+    h += '<p class="lead">지금까지 채우신 건 '+P.comp.pct+'%입니다. 이 정도로는 아래 내용이 당신 얘기가 아니라 <b>기본값으로 채운 빈 양식</b>에 가깝습니다. 믿지 마세요.</p>';
+    h += '<p class="lead">아래에서 덜 채운 곳으로 바로 갈 수 있습니다. 1단계와 2단계만 채우셔도 결과가 완전히 달라집니다.</p>';
+    h += '</div>';
+    h += '<section class="rsec" style="margin-top:0">'+compSection(P)+'</section>';
+    h += '<hr class="hr"><p class="tiny">아래는 지금 답을 기준으로 계산한 것입니다. 참고만 하세요.</p>';
+  }
+  h += '<div class="hero" style="padding-top:'+(P.comp.pct<30?'20px':'44px')+'">';
   h += '<span class="kicker">정답이 아니라, 지금의 한 가지</span>';
   if(C){
     h += '<h1>지금은 이것부터<br>'+esc(C.t)+'</h1>';
@@ -1347,6 +1414,7 @@ function renderResult(){
   }
   h += '</div>';
 
+  if(P.comp.pct >= 30) h += '<section class="rsec" style="margin-top:0">'+compSection(P)+'</section>';
   h += '<section class="rsec"><h2>당신이 적은 것 중에서</h2><p class="sub">'
      + (C ? '초점 질문 세 개로 매겼습니다. <b>하나를 밀면 나머지가 같이 넘어가는가</b>에 가장 큰 무게를 뒀습니다 — 그게 원씽의 정의니까요.'
           : '적어주신 후보가 없어서 이 칸이 비었습니다.')
@@ -1446,13 +1514,7 @@ document.addEventListener("click", e=>{
   const b = e.target.closest("[data-go]");
   if(b) go(parseInt(b.dataset.go,10));
 });
-$("#finishBtn").onclick = ()=>{
-  const answered = Object.values(S.sign).filter(o=> o.y != null).length;
-  const yes = Object.values(S.sign).filter(o=> o.y > 0).length;
-  if(answered < 8){ toast("2단계를 끝까지 답해주세요 (아니다도 답입니다)"); go(2); return; }
-  if(yes < 2){ toast("2단계에서 해당되는 게 최소 두 개는 있어야 합니다"); go(2); return; }
-  renderResult(); go(7);
-};
+$("#finishBtn").onclick = ()=>{ renderResult(); go(7); };
 $("#addCand").onclick = ()=>{
   if(S.cands.length >= 7){ toast("일곱 개면 충분합니다"); return; }
   S.cands.push({t:"", d:[null,null,null]}); buildCands(); save(true);
