@@ -83,6 +83,17 @@ textarea:focus,input:focus{outline:2px solid var(--accent-line);outline-offset:1
 textarea::placeholder{color:var(--ink-3)}
 
 /* sign grid */
+.cand{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;background:var(--card);transition:border-color .2s,background .2s}
+.cand.filled{border-color:var(--accent-line);background:var(--accent-soft)}
+.cand-head{display:flex;gap:8px;align-items:center}
+.cand-head input{flex:1;min-width:0}
+.cand-del{flex:none;background:none;border:1px solid var(--line);color:var(--ink-3);
+  border-radius:8px;width:34px;height:38px;cursor:pointer;font-family:inherit;font-size:14px}
+.cand-del:hover{border-color:var(--accent-line);color:var(--ink)}
+.cand-q{display:none;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line)}
+.cand.filled .cand-q{display:block;animation:in .22s ease}
+.cand-q .q{margin:15px 0 0}
+.cand-q .q:first-child{margin-top:0}
 .signcard{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin:9px 0;background:var(--bg-soft);transition:border-color .2s,background .2s}
 .signcard.hot{border-color:var(--accent-line);background:var(--accent-soft)}
 .signcard .act{font-weight:650;font-size:15.5px;margin-bottom:9px;line-height:1.55}
@@ -214,37 +225,36 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:v
 
 <!-- ========== STEP 1 : 서사 ========== -->
 <section class="step" id="s1">
-  <div class="stepnum">STEP 1 / 6 · 서사</div>
-  <h2>당신에게 실제로 있었던 일</h2>
+  <div class="stepnum">STEP 1 / 6 · 지금 붙잡고 있는 것</div>
+  <h2>머릿속에 있는 걸<br>전부 꺼내 주세요</h2>
   <p class="muted" style="font-size:15px">
-    무엇을 좋아하냐고 묻지 않겠습니다. 그건 희망사항이 섞이거든요.
-    실제로 <b>있었던 일</b>만 적어주세요. 짧아도 되고, 한 칸쯤 비워도 됩니다.
+    하고 있는 것, 하려다 만 것, 해야 할 것 같은 것. <b>두세 개만 있어도 됩니다.</b>
+    원씽은 없던 걸 새로 찾는 게 아니라, 이미 붙잡고 있는 것들 중에서 고르거나 버리는 일이거든요.
+  </p>
+  <div id="candBox"></div>
+  <button class="btn sec" id="addCand" type="button" style="margin-top:4px">+ 하나 더 적기</button>
+  <p class="tiny" style="margin-top:10px">아무것도 떠오르지 않아도 괜찮습니다. 비워두고 넘어가시면 다른 방식으로 찾아드립니다.</p>
+
+  <hr class="hr">
+  <h2>그리고, 있었던 일 몇 가지</h2>
+  <p class="muted" style="font-size:15px">
+    전부 <b>건너뛰셔도 됩니다.</b> 다만 한 줄이라도 적으면 결과가 눈에 띄게 정확해집니다.
   </p>
   <div class="card">
-    <div class="q">
+    <div class="q" style="margin-top:0">
       <div class="qh">최근 3년, 시간 가는 줄 몰랐던 순간</div>
-      <div class="qs">고개 들었더니 3시간이 지나 있던 그때. 무엇을 하고 있었나요?</div>
-      <textarea rows="3" data-n="n1" placeholder="예) 앱 화면 배치를 이리저리 옮겨보다가 새벽 2시가 된 날"></textarea>
-    </div>
-    <div class="q">
-      <div class="qh">남들은 어렵다는데 나는 이상하게 쉬웠던 일</div>
-      <div class="qs">"이게 왜 어렵지?" 싶었던 것. 재능은 대개 이 자리에 숨어 있습니다.</div>
-      <textarea rows="3" data-n="n2" placeholder="예) 복잡한 걸 한 문장으로 줄이는 것 / 처음 만난 사람과 대화 트는 것"></textarea>
+      <div class="qs">고개 들었더니 세 시간이 지나 있던 그때. 뭘 하고 있었나요?</div>
+      <textarea rows="2" data-n="n1" placeholder="예) 앱 화면 배치를 이리저리 옮겨보다가 새벽 2시가 된 날"></textarea>
     </div>
     <div class="q">
       <div class="qh">돈을 안 줘도 계속했던 일</div>
       <div class="qs">대가 없이, 시키지도 않았는데 붙잡고 있었던 것.</div>
-      <textarea rows="3" data-n="n3" placeholder="예) 주변 사람 운동 자세 봐주기 / 좋은 글 모아서 정리해두기"></textarea>
+      <textarea rows="2" data-n="n3" placeholder="예) 주변 사람 운동 자세 봐주기 / 좋은 글 모아서 정리해두기"></textarea>
     </div>
-    <div class="q">
-      <div class="qh">누군가 나에게 진심으로 고마워했던 순간</div>
-      <div class="qs">그때 내가 정확히 무엇을 해줬나요? 남이 보는 내 쓸모는 보통 내 짐작과 다릅니다.</div>
-      <textarea rows="3" data-n="n4" placeholder="예) 막막해하던 후배한테 순서를 정해줬을 때"></textarea>
-    </div>
-    <div class="q">
-      <div class="qh">세상에서 딱 하나 바꿀 수 있다면</div>
-      <div class="qs">거창하지 않아도 됩니다. 눈앞의 열 명에 대한 것이어도 좋습니다.</div>
-      <textarea rows="3" data-n="n5" placeholder="예) 아픈 다음에 운동 시작하는 사람이 줄었으면"></textarea>
+    <div class="q" style="margin-bottom:0">
+      <div class="qh">누군가 진심으로 고마워했던 순간</div>
+      <div class="qs">그때 내가 정확히 뭘 해줬나요? 남이 보는 내 쓸모는 보통 내 짐작과 다릅니다.</div>
+      <textarea rows="2" data-n="n4" placeholder="예) 막막해하던 후배한테 순서를 정해줬을 때"></textarea>
     </div>
   </div>
   <div class="nav">
@@ -395,6 +405,18 @@ const THEMES = {
   analyze:   {ko:"따져보기", desc:"숫자와 흐름을 보고 판단하는 힘"},
   pioneer:   {ko:"먼저 하기", desc:"아무도 안 한 걸 먼저 해보는 힘"}
 };
+
+/* 게리 켈러의 초점 질문 그 자체. 도미노에 가장 큰 무게를 준다 —
+   "하나를 밀면 나머지가 같이 넘어가는가"가 원씽의 정의이기 때문이다. */
+const FOCUS = [
+  {k:"domino", w:3, q:"이걸 하면 나머지가 더 쉬워지거나, 아예 안 해도 되나요?",
+   s:"이게 원씽의 핵심 질문입니다. 하나를 밀면 나머지가 같이 넘어가는가.",
+   o:["아니다","조금 그렇다","확실히 그렇다"]},
+  {k:"urgent", w:1, q:"이걸 반년 미루면 다른 게 무너지나요?",
+   s:"", o:["아니다","조금","그렇다"]},
+  {k:"doable", w:2, q:"지금 형편에서 이번 주에 첫걸음을 뗄 수 있나요?",
+   s:"", o:["어렵다","애매하다","할 수 있다"]}
+];
 
 const ACTS = [
   {k:"make",      t:"필요한 게 없어서 직접 만들어 쓴 적이 있다",
@@ -696,6 +718,7 @@ ACTS.forEach(a=>S.sign[a.k]={y:null, note:"", S:0,I:0,G:0,N:0});
 Object.keys(MOTIVES).forEach(k=>S.mot[k]=null);
 Object.keys(IKIGAI).forEach(k=>S.ik[k]=null);
 CTX.forEach(c=>S.ctx[c.k]=null);
+S.cands = [];   // 지금 붙잡고 있는 것들
 S.hyg={}; Object.keys(HYGIENE).forEach(k=>S.hyg[k]=null);
 S.allocSay=[]; S.allocDid=[];
 S.strat={}; STRATEGY.forEach(q=>S.strat[q.k]=null);
@@ -712,7 +735,7 @@ function load(){
     const d = JSON.parse(raw);
     Object.assign(S.n,d.n||{}); Object.assign(S.mot,d.mot||{}); Object.assign(S.ik,d.ik||{}); Object.assign(S.ctx,d.ctx||{});
     Object.assign(S.hyg,d.hyg||{}); Object.assign(S.strat,d.strat||{});
-    S.after = d.after||[]; S.allocSay = d.allocSay||[]; S.allocDid = d.allocDid||[];
+    S.after = d.after||[]; S.allocSay = d.allocSay||[]; S.allocDid = d.allocDid||[]; S.cands = d.cands||[];
     if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=migrateSign(d.sign[k]); });
     buildAll(); toast("불러왔습니다"); return true;
   }catch(e){ toast("불러오기 실패"); return false; }
@@ -724,6 +747,49 @@ function migrateSign(o){
   const st = {y:null, note:"", S:0,I:0,G:0,N:0, ...o};
   if(st.y == null) st.y = SIGNS.some(sg=>st[sg.k]) ? 2 : null;
   return st;
+}
+
+function buildCands(){
+  const box = $("#candBox"); box.innerHTML = "";
+  if(!S.cands.length) S.cands.push({t:"", d:[null,null,null]});
+  S.cands.forEach((c, idx)=>{
+    const card = el("div","cand");
+    const head = el("div","cand-head");
+    const inp = el("input"); inp.type = "text";
+    inp.placeholder = ["예) 블로그 다시 시작하기","예) 만든 앱을 다른 사람한테도 팔아보기",
+                       "예) 운동 습관 되돌리기","예) 자격증 공부","예) 유튜브 채널",
+                       "예) 이직 준비"][idx] || "하나 더 적어주세요";
+    inp.value = c.t || "";
+    const sync = ()=> card.classList.toggle("filled", (c.t||"").trim().length > 1);
+    inp.oninput = ()=>{ c.t = inp.value; sync(); save(true); };
+    head.appendChild(inp);
+    if(S.cands.length > 1){
+      const del = el("button","cand-del","\u2715"); del.type = "button";
+      del.setAttribute("aria-label","이 항목 지우기");
+      del.onclick = ()=>{ S.cands.splice(idx,1); buildCands(); save(true); };
+      head.appendChild(del);
+    }
+    card.appendChild(head);
+
+    // 적은 게 있을 때만 초점 질문이 열린다 — 빈 칸에 질문 세 개는 소음이다
+    const qs = el("div","cand-q");
+    FOCUS.forEach((f, fi)=>{
+      const q = el("div","q");
+      q.appendChild(el("div","qh", esc(f.q)));
+      if(f.s) q.appendChild(el("div","qs", esc(f.s)));
+      const row = el("div","opts");
+      f.o.forEach((lb,i)=>{
+        const b = el("button","opt", esc(lb)); b.type = "button";
+        b.onclick = ()=>{ c.d[fi] = i; [...row.children].forEach((x,j)=>x.classList.toggle("on", j===i)); save(true); };
+        if(c.d[fi] === i) b.classList.add("on");
+        row.appendChild(b);
+      });
+      q.appendChild(row); qs.appendChild(q);
+    });
+    card.appendChild(qs);
+    sync();
+    box.appendChild(card);
+  });
 }
 
 function buildSign(){
@@ -881,7 +947,7 @@ function buildStrategy(){
     q.appendChild(row); box.appendChild(q);
   });
 }
-function buildAll(){ buildNarrative(); buildSign(); buildMotives(); buildAfterglow(); buildHygiene(); buildIkigai();
+function buildAll(){ buildCands(); buildNarrative(); buildSign(); buildMotives(); buildAfterglow(); buildHygiene(); buildIkigai();
   multiPick("#allocSay","allocSay",3); multiPick("#allocDid","allocDid",3); buildStrategy(); buildCtx(); }
 
 /* ================= ENGINE ================= */
@@ -982,10 +1048,32 @@ function computeStrategy(){
   const mode = conf<=1 ? "emergent" : "deliberate";
   return {chance, conf, mode};
 }
+/* 후보를 초점 질문으로 매긴다. 도미노가 가장 무겁다 — 그게 원씽의 정의니까.
+   후보 문장에서 어떤 힘이 필요한지 추정해 본인 강점과 얼마나 맞는지도 조금 얹는다. */
+function scoreCands(th){
+  return S.cands
+    .filter(c => (c.t||"").trim().length > 1)
+    .map(c => {
+      let sum = 0, wsum = 0;
+      FOCUS.forEach((f, fi)=>{ sum += (c.d[fi]==null ? 1 : c.d[fi]) * f.w; wsum += 2 * f.w; });
+      const focus = sum / wsum;
+      let theme = null, bestHit = 0;
+      Object.keys(LEX).forEach(k=>{
+        let hit = 0; LEX[k].forEach(w=>{ if(c.t.indexOf(w) >= 0) hit++; });
+        if(hit > bestHit){ bestHit = hit; theme = k; }
+      });
+      const align = theme ? th[theme].norm : 0;
+      return {t: c.t.trim(), d: c.d.slice(), focus, align, theme,
+              fit: Math.max(.02, Math.min(1, focus * .82 + align * .18))};
+    })
+    .sort((a,b)=> b.fit - a.fit);
+}
+
 function profile(){
   const th=computeThemes(), mot=computeMotives(), ik=computeIkigai(), ctx=computeCtx();
   const hyg=computeHygiene(), alloc=computeAlloc(), strat=computeStrategy();
-  return {th, mot, ik, ctx, hyg, alloc, strat, ranked:scorePaths(th,mot,ik,ctx)};
+  return {th, mot, ik, ctx, hyg, alloc, strat,
+          cands: scoreCands(th), ranked: scorePaths(th,mot,ik,ctx)};
 }
 </script>
 
@@ -1036,31 +1124,71 @@ function pathWhy(r, P){
   return parts.map(s=>"<div style='margin:6px 0'>"+s+"</div>").join("");
 }
 
-function ladder(top, P){
+function ladder(top, P, target){
   const H = ["3개월","1년","3년","10년"][P.ctx.horizon];
   const items = [
-    ["가장 먼 곳", H+" 뒤에 당신이 <b>"+esc(top.p.name)+"</b>으로 불리고 있으려면, 그때의 당신은 무엇을 반복해왔어야 할까요."],
+    ["가장 먼 곳", H+" 뒤에 <b>"+esc(target.name)+"</b>이(가) 자리를 잡으려면, 그때의 당신은 무엇을 반복해왔어야 할까요."],
     ["1년", "그 반복의 증거가 12개쯤 쌓여 있으려면, 한 달에 하나씩은 세상에 나와야 합니다. 완성도가 아니라 개수가 기준입니다."],
     ["이번 달", "그 증거 중 <b>첫 번째 하나</b>를 완성합니다. 남에게 보여줄 수 있는 형태여야 합니다. 내 서랍 속 초안은 증거가 아닙니다. 그리고 그 시간을 어디서 뺄지 먼저 정하세요 — 무엇을 <b>그만둘지</b> 정하지 않은 계획은 계획이 아니라 소원입니다."],
-    ["이번 주", esc(top.p.exp2w)],
+    ["이번 주", esc(target.exp2w)],
     ["지금 30분", "위 문장에서 대상 하나 — 사람 이름이든 주제 하나든 — 를 지금 적어서 확정합니다. 고르는 데 더 쓰는 시간은 전부 도망입니다."]
   ];
   return '<ul class="ladder">'+items.map(([t,b])=>'<li><div class="lt">'+t+'</div><div>'+b+'</div></li>').join("")+'</ul>';
 }
 
-function experiment(top, P){
+function experiment(top, P, target){
   const timeNote = ["주 3시간밖에 없으니, 한 번에 90분씩 두 번의 블록으로 쪼개세요. 매일 하려다 무너지는 게 당신 맥락에선 가장 흔한 실패입니다.",
                     "주 4~7시간이면 주말에 3시간 블록 하나 + 평일 저녁 두 번이 현실적입니다.",
                     "주 8~14시간이면 2주 안에 눈에 보이는 결과물이 나옵니다. 범위를 늘리지 말고 완성도를 올리세요.",
                     "시간은 충분합니다. 여기서 실패한다면 원인은 시간이 아니라 대상 선정입니다."][P.ctx.time];
-  return '<div class="exp"><h3>'+esc(top.p.name)+' 가설을 검증하는 2주</h3>'+
-    '<p style="font-size:15px;color:var(--ink-2);margin-top:8px">'+esc(top.p.exp2w)+'</p><ul>'+
+  return '<div class="exp"><h3>'+esc(target.name)+' — 2주 동안 해볼 것</h3>'+
+    '<p style="font-size:15px;color:var(--ink-2);margin-top:8px">'+esc(target.exp2w)+'</p><ul>'+
     '<li><b>기간</b> 오늘부터 14일. 연장 없음. 끝나면 무조건 판단합니다.</li>'+
     '<li><b>시간</b> '+esc(timeNote)+'</li>'+
     '<li><b>성공 기준</b> 남이 좋다고 하는 것이 아니라, <b>끝나고 당신에게 기운이 남아 있는가</b>입니다. 결과가 좋았는데 소진됐다면 그건 실패한 실험입니다.</li>'+
     '<li><b>두 번째 기준</b> 단 한 사람이라도 “이거 나한테 필요하다”고 말했는가. 칭찬은 신호가 아닙니다. 요청이 신호입니다.</li>'+
     '<li><b>기록</b> 매일 세 줄 — 오늘 한 것 / 막힌 것 / 지금 기분. 이 기록이 그대로 다음 항목의 재료가 됩니다.</li>'+
     '<li><b>예외 없음</b> \u201c이번 한 번만\u201d은 없습니다. 2주 동안 한 번 예외를 허용하면 그 다음부터 기준이 사라집니다. 100%를 지키는 게 98%를 지키는 것보다 오히려 쉽습니다. 한계비용이 싸 보이는 그 한 번이 전체 비용입니다.</li></ul></div>';
+}
+
+function candWhy(c, i, P){
+  const out = [];
+  const D = c.d[0], U = c.d[1], F = c.d[2];
+  if(D === 2) out.push("<b>도미노</b> 이걸 밀면 나머지가 같이 넘어간다고 답하셨습니다. 원씽의 정의에 가장 가까운 후보입니다.");
+  else if(D === 0) out.push("<b>도미노</b> 이건 다른 걸 쉽게 만들어주지 않는다고 답하셨습니다. 좋은 일일 수는 있어도 <b>원씽은 아닙니다</b>.");
+  else out.push("<b>도미노</b> 나머지를 조금은 쉽게 만든다고 답하셨습니다.");
+
+  if(F === 0) out.push("<b>시작</b> 이번 주에 첫걸음을 떼기 어렵다고 하셨습니다. <b>지금이 아니라는 뜻</b>이지 영영 아니라는 뜻은 아닙니다.");
+  else if(F === 2) out.push("<b>시작</b> 이번 주에 바로 뗄 수 있다고 하셨습니다. 이게 순위를 크게 올렸습니다.");
+
+  if(U === 2) out.push("<b>시급</b> 반년 미루면 다른 게 무너진다고 하셨습니다.");
+
+  if(c.theme){
+    const tn = P.th[c.theme].norm;
+    if(tn >= .6) out.push("<b>잘하는 것</b> 이 일은 주로 <b>" + THEMES[c.theme].ko + "</b>을(를) 요구하는데, 그게 당신의 상위 강점입니다.");
+    else if(tn <= .25) out.push("<b>잘하는 것</b> 이 일은 주로 <b>" + THEMES[c.theme].ko + "</b>을(를) 요구하는데, 거기서는 당신 신호가 약했습니다. 못 한다는 뜻은 아니고 <b>배우면서 해야 한다</b>는 뜻입니다.");
+  }
+  if(i > 0) out.push('<span style="color:var(--ink-3)">지금은 아닙니다. 1순위를 끝내고 다시 보세요. 그때 이게 저절로 쉬워졌거나, 아예 필요 없어졌을 수도 있습니다.</span>');
+  return out.map(x => "<div style='margin:6px 0'>" + x + "</div>").join("");
+}
+
+function candSection(P){
+  const cs = P.cands;
+  if(!cs.length) return '<div class="card"><p class="muted" style="font-size:15px">1단계를 비워두셨습니다. 그래서 아래에서는 24개 길 중에 골라드렸습니다.</p>'
+    + '<p class="tiny" style="margin-top:8px">다만 이 도구는 <b>당신이 직접 적은 후보</b>가 있을 때 훨씬 정확합니다. 24개는 제가 만든 목록이지 당신의 선택지가 아니니까요. 돌아가서 두세 개만 적어보시길 권합니다.</p></div>';
+  let h = "";
+  cs.forEach((c, i)=>{
+    h += '<div class="path' + (i === 0 ? " top" : "") + '">';
+    h += '<div class="path-h"><span class="rank">' + (i === 0 ? "지금의 한 가지" : (i+1) + "순위")
+       + '</span><span class="fit mono">' + Math.round(c.fit * 100) + '점</span></div>';
+    h += '<h3>' + esc(c.t) + '</h3>';
+    h += '<div class="chips">' + FOCUS.map((f, fi)=>
+          '<span class="chip">' + esc(f.o[c.d[fi] == null ? 1 : c.d[fi]]) + '</span>').join("") + '</div>';
+    h += '<div class="why">' + candWhy(c, i, P) + '</div></div>';
+  });
+  if(cs.length > 1)
+    h += '<p class="tiny" style="margin-top:14px">나머지를 버리라는 게 아닙니다. <b>순서를 정한 것</b>입니다. 원씽은 하나만 하고 나머지를 포기하는 게 아니라, 하나를 먼저 밀어서 나머지를 쉽게 만드는 겁니다.</p>';
+  return h;
 }
 
 function hygieneSection(P){
@@ -1201,12 +1329,28 @@ function renderResult(){
   const themeRank = topEntries(P.th, v=>v.norm, 12);
   const R = $("#result");
 
+  const C = P.cands[0] || null;
+  // 사람이 적은 후보가 있으면 그게 답이다. 24개는 내 목록이지 그 사람의 선택지가 아니다.
+  const target = C ? {name: C.t,
+                      exp2w: "\u201c" + C.t + "\u201d 를 이번 2주 안에 가장 작게 한 번 해보고, 완성 전에 한 사람에게 보여준다."}
+                   : {name: top3[0].p.name, exp2w: top3[0].p.exp2w};
+
   let h = "";
   h += '<div class="hero" style="padding-top:44px">';
-  h += '<span class="kicker">진단이 아니라 가설</span>';
-  h += '<h1>당신의 맥락에서는<br>'+esc(top3[0].p.name)+'</h1>';
-  h += '<p class="lead">'+esc(top3[0].p.one)+'. 적합도 '+Math.round(top3[0].fit*100)+'점. 아래는 왜 그렇게 봤는지에 대한 근거 전부입니다.</p>';
+  h += '<span class="kicker">정답이 아니라, 지금의 한 가지</span>';
+  if(C){
+    h += '<h1>지금은 이것부터<br>'+esc(C.t)+'</h1>';
+    h += '<p class="lead">당신이 적은 '+P.cands.length+'개 중에서 골랐습니다. 나머지를 버리라는 게 아니라 <b>순서를 정한 것</b>입니다. 아래는 왜 그렇게 봤는지에 대한 근거 전부입니다.</p>';
+  } else {
+    h += '<h1>지금 형편에서는<br>'+esc(top3[0].p.name)+'</h1>';
+    h += '<p class="lead">'+esc(top3[0].p.one)+'. 적합도 '+Math.round(top3[0].fit*100)+'점. 아래는 왜 그렇게 봤는지에 대한 근거 전부입니다.</p>';
+  }
   h += '</div>';
+
+  h += '<section class="rsec"><h2>당신이 적은 것 중에서</h2><p class="sub">'
+     + (C ? '초점 질문 세 개로 매겼습니다. <b>하나를 밀면 나머지가 같이 넘어가는가</b>에 가장 큰 무게를 뒀습니다 — 그게 원씽의 정의니까요.'
+          : '적어주신 후보가 없어서 이 칸이 비었습니다.')
+     + '</p>' + candSection(P) + '</section>';
 
   h += '<section class="rsec"><h2>먼저, 당신이 쓴 문장</h2><p class="sub">여기서부터 출발합니다.</p>'+quoteBack(P)+'</section>';
 
@@ -1232,7 +1376,10 @@ function renderResult(){
 
   h += '<section class="rsec"><h2>당신의 진짜 전략</h2><p class="sub">전략은 말이 아니라 자원이 가는 곳에 드러납니다. 선언과 배분이 어긋난 자리가 곧 당신이 실제로 살고 있는 인생입니다.</p>'+strategySection(P)+'</section>';
 
-  h += '<section class="rsec"><h2>당신의 한 가지, 세 가지 가설</h2><p class="sub">강점 45% · 연료 35% · 이키가이 빈칸 20%로 점수를 매긴 뒤, 당신의 맥락 제약으로 감점했습니다.</p>';
+  h += '<section class="rsec"><h2>' + (C ? '혹시 이런 길도 있습니다' : '당신의 한 가지, 세 가지 가설') + '</h2><p class="sub">'
+     + (C ? '당신이 적은 것과 별개로, 잘하는 것·기운 나는 것·형편만 보고 계산하면 이런 길이 나옵니다. <b>참고용입니다.</b> 위에 적으신 것이 우선입니다.'
+          : '잘하는 것 45% · 기운 나는 것 35% · 이키가이 빈칸 20%로 점수를 매긴 뒤, 지금 형편으로 감점했습니다.')
+     + '</p>';
   top3.forEach((r,i)=>{
     h += '<div class="path'+(i===0?" top":"")+'"><div class="path-h"><span class="rank">가설 '+(i+1)+'</span><span class="fit mono">'+Math.round(r.fit*100)+'점</span></div>';
     h += '<h3>'+esc(r.p.name)+'</h3><p class="muted" style="margin:2px 0 0;font-size:15px">'+esc(r.p.one)+'</p>';
@@ -1245,9 +1392,9 @@ function renderResult(){
 
   h += '<section class="rsec"><h2>몰아넣을 때인가, 흩뿌릴 때인가</h2><p class="sub">확신이 있을 땐 자원을 집중하는 게 맞고, 확신이 없을 땐 값싼 시도를 여러 개 던지는 게 맞습니다. 순서를 바꾸면 둘 다 실패합니다.</p>'+modeSection(P)+'</section>';
 
-  h += '<section class="rsec"><h2>초점 질문 사다리</h2><p class="sub">원싱의 핵심은 목록을 줄이는 게 아니라, 가장 먼 곳에서 거꾸로 내려와 오늘 할 하나에 닿는 것입니다.</p><div class="card">'+ladder(top3[0],P)+'</div></section>';
+  h += '<section class="rsec"><h2>오늘 할 하나까지</h2><p class="sub">가장 먼 곳에서 거꾸로 내려옵니다. 원씽은 목록을 줄이는 게 아니라 오늘 할 하나에 닿는 것입니다.</p><div class="card">'+ladder(top3[0],P,target)+'</div></section>';
 
-  h += '<section class="rsec"><h2>2주 실험</h2><p class="sub">가설은 검증되기 전까지 값어치가 없습니다. 여기까지 해야 이 도구를 쓴 겁니다.</p>'+experiment(top3[0],P)+'</section>';
+  h += '<section class="rsec"><h2>2주 실험</h2><p class="sub">맞는지 아닌지는 해봐야 압니다. 여기까지 해야 이 도구를 쓴 겁니다.</p>'+experiment(top3[0],P,target)+'</section>';
 
   h += '<section class="rsec"><h2>당신에게는 독이 될 조언</h2><p class="sub">좋은 조언이어서 더 위험합니다. 다른 맥락에서는 맞는 말이기 때문입니다.</p>'+poisons(P)+'</section>';
 
@@ -1306,6 +1453,12 @@ $("#finishBtn").onclick = ()=>{
   if(yes < 2){ toast("2단계에서 해당되는 게 최소 두 개는 있어야 합니다"); go(2); return; }
   renderResult(); go(7);
 };
+$("#addCand").onclick = ()=>{
+  if(S.cands.length >= 7){ toast("일곱 개면 충분합니다"); return; }
+  S.cands.push({t:"", d:[null,null,null]}); buildCands(); save(true);
+  const last = document.querySelector("#candBox .cand:last-child input");
+  if(last) last.focus();
+};
 $("#saveBtn").onclick = ()=> save();
 $("#loadBtn").onclick = ()=> { if(load()) go(1); };
 $("#resetBtn").onclick = ()=>{
@@ -1315,7 +1468,7 @@ $("#resetBtn").onclick = ()=>{
 };
 
 buildAll();
-try{ if(localStorage.getItem(KEY)){ const d=JSON.parse(localStorage.getItem(KEY)); Object.assign(S.n,d.n||{}); Object.assign(S.mot,d.mot||{}); Object.assign(S.ik,d.ik||{}); Object.assign(S.ctx,d.ctx||{}); S.after=d.after||[]; S.allocSay=d.allocSay||[]; S.allocDid=d.allocDid||[]; Object.assign(S.hyg,d.hyg||{}); Object.assign(S.strat,d.strat||{}); if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=migrateSign(d.sign[k]); }); buildAll(); } }catch(e){}
+try{ if(localStorage.getItem(KEY)){ const d=JSON.parse(localStorage.getItem(KEY)); Object.assign(S.n,d.n||{}); Object.assign(S.mot,d.mot||{}); Object.assign(S.ik,d.ik||{}); Object.assign(S.ctx,d.ctx||{}); S.after=d.after||[]; S.allocSay=d.allocSay||[]; S.allocDid=d.allocDid||[]; S.cands=d.cands||[]; Object.assign(S.hyg,d.hyg||{}); Object.assign(S.strat,d.strat||{}); if(d.sign) Object.keys(d.sign).forEach(k=>{ if(S.sign[k]) S.sign[k]=migrateSign(d.sign[k]); }); buildAll(); } }catch(e){}
 </script>
 </body>
 </html>
